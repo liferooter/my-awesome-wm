@@ -650,7 +650,7 @@ end)
 
 -- {{{ Autostart
 autostart_list = {
-   "compton -b",
+   "compton -b --config ~/.config/awesome/compton.conf",
    "volumeicon",
    "xinput disable 13",
    "xfce4-power-manager",
