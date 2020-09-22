@@ -8,7 +8,7 @@ local dpi = xresources.apply_dpi
 
 local gfs = require("gears.filesystem")
 local gears = require("gears")
-local themes_path = "~/.local/share/awesome/themes/"
+local themes_path = "~/.config/awesome/themes/"
 
 local theme = {}
 
