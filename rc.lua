@@ -14,9 +14,11 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local icontheme = require("menubar.icon_theme")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
+
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -63,6 +65,8 @@ nice{
 
 -- This is used later as the default terminal and editor to run.
 terminal = "kitty"
+menubar.utils.terminal = terminal
+icon_theme = icontheme.new("McMuse-dark", {"~/.local/share/icons", "~/.icons", "/usr/share/icons"})
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -83,7 +87,7 @@ awful.layout.layouts = {
    awful.layout.suit.spiral,
    awful.layout.suit.spiral.dwindle,
    awful.layout.suit.max,
-   awful.layout.suit.max.fullscreen,
+--   awful.layout.suit.max.fullscreen,
    awful.layout.suit.magnifier,
    awful.layout.suit.corner.nw,
    awful.layout.suit.corner.ne,
@@ -265,10 +269,21 @@ awful.screen.connect_for_each_screen(function(s)
 	    end
 	 },
       }
-
+      
+      s.mybattery_text = wibox.widget.textbox()
+      s.mybattery_text.font = "Font Awesome 10"
+      
+      s.mybattery = awful.widget.watch("bash -c \"~/.config/awesome/bin/battery.sh\"", 1,
+				       function (widget, stdout)
+					  widget:set_text(stdout)
+				       end,
+				       s.mybattery_text
+      )
+      
       s.mysystray = wibox.widget.systray{
 	 forced_width 	= 30,
       }
+      
       s.mysystray:set_horizontal(false)
       -- Create the wibox
       s.mywibox_top = awful.wibar({ position = "top", screen = s, height = 40 })
@@ -283,6 +298,7 @@ awful.screen.connect_for_each_screen(function(s)
 	 s.mytasklist, -- Middle widget
 	 { -- Right widgets
 	    layout = wibox.layout.fixed.horizontal,
+	    s.mybattery,
 	    mykeyboardlayout,
 	    mytextclock,
 	    s.mylayoutbox,
@@ -290,10 +306,14 @@ awful.screen.connect_for_each_screen(function(s)
       }
 
       s.mywibox_left = awful.wibar({ position = "left", screen = s, width = 40})
+      
       s.mywibox_left:setup {
 	 s.mytaglist,
 	 nil,
-	 s.mysystray,
+	 {
+	    layout = wibox.layout.fixed.vertical,
+	    s.mysystray,
+	 },
 	 layout = wibox.layout.align.vertical,
       }
 end)
@@ -599,8 +619,8 @@ end)
 naughty.connect_signal("request::icon", function(n, context, hints)
     if context ~= "app_icon" then return end
 
-    local path = menubar.utils.lookup_icon(hints.app_icon) or
-        menubar.utils.lookup_icon(hints.app_icon:lower())
+    local path = icon_theme:find_icon_path(hints.app_icon) or
+        menubar.utils.lookup_icon_uncached(hints.app_icon:lower())
 
     if path then
         n.icon = path
@@ -625,7 +645,6 @@ autostart_list = {
    "compton -b --config ~/.config/awesome/compton.conf",
    "volumeicon",
    "xinput disable 13",
-   "xfce4-power-manager",
    "xss-lock i3lock-next",
    "/usr/lib/xfce-polkit/xfce-polkit",
    "blueman-applet",
