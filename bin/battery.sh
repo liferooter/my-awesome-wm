@@ -26,4 +26,4 @@ else
 	    ;;
     esac
 fi
-echo "  ${POWER}%   "
+echo "  ${POWER}%     $(xbacklight -get | python -c 'print(int(float(input())))')%"

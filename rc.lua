@@ -321,11 +321,16 @@ end)
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
+   -- Brightness
+   awful.key({ }, "XF86MonBrightnessDown", function ()
+	 awful.util.spawn("xbacklight -dec 10") end),
+   awful.key({ }, "XF86MonBrightnessUp", function ()
+	 awful.util.spawn("xbacklight -inc 10") end),
    awful.key({ modkey, "Shift" }, "s",      hotkeys_popup.show_help,
       {description="show help", group="awesome"}),
    awful.key({ modkey, "Mod1" }, "l", function ()
 	 awful.util.spawn("i3lock-next")
-			       end,
+				      end,
       {description = "lock screen", group = "apps"}
    ),
    awful.key({ modkey, }, "w",   awful.tag.viewprev,
