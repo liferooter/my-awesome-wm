@@ -293,6 +293,14 @@ awful.screen.connect_for_each_screen(function(s)
 	 layout = wibox.layout.align.horizontal,
 	 { -- Left widgets
 	    layout = wibox.layout.fixed.horizontal,
+	    -- {
+	       -- widget = wibox.widget.textbox,
+	       -- font = "Material Icons 20",
+	       -- text = "",
+	       -- forced_width = 40,
+	       -- align = "center",
+	       -- fg_color = "#ffffff"
+	    -- },
 	    s.mypromptbox,
 	 },
 	 s.mytasklist, -- Middle widget
@@ -433,7 +441,7 @@ clientkeys = gears.table.join(
 	 c:raise()
       end,
       {description = "toggle fullscreen", group = "client"}),
-   awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end,
+   awful.key({ modkey   }, "q",      function (c) c:kill()                         end,
       {description = "close", group = "client"}),
    awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
       {description = "toggle floating", group = "client"}),
@@ -649,8 +657,7 @@ end)
 autostart_list = {
    "compton -b --config ~/.config/awesome/compton.conf",
    "volumeicon",
-   "xinput disable 13",
-   "xss-lock i3lock-next",
+   "xss-lock ~/.config/awesome/bin/lock.sh",
    "/usr/lib/xfce-polkit/xfce-polkit",
    "blueman-applet",
    "~/.local/bin/autostart_all",
