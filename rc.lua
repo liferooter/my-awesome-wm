@@ -66,7 +66,7 @@ nice{
 -- This is used later as the default terminal and editor to run.
 terminal = "kitty"
 menubar.utils.terminal = terminal
-icon_theme = icontheme.new("McMuse-dark", {"~/.local/share/icons", "~/.icons", "/usr/share/icons"})
+icon_theme = icontheme.new("Papirus-Dark", {"~/.local/share/icons", "~/.icons", "/usr/share/icons"})
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -638,7 +638,7 @@ naughty.connect_signal("request::icon", function(n, context, hints)
     if path then
         n.icon = path
     else
-	n.icon = "/usr/share/icons/McMuse-dark/actions/24/hook-notifier.svg"
+	n.icon = "/usr/share/icons/Papirus-Dark/24x24/actions/hook-notifier.svg"
     end
 end)
 
@@ -657,13 +657,11 @@ end)
 autostart_list = {
    "compton -b --config ~/.config/awesome/compton.conf",
    "volumeicon",
-   "xss-lock ~/.config/awesome/bin/lock.sh",
+   "xss-lock i3lock-next",
    "/usr/lib/xfce-polkit/xfce-polkit",
    "blueman-applet",
-   "~/.local/bin/autostart_all",
-   "thunderbird",
-   "tilda",
-   "nm-applet"
+   "nm-applet",
+   "~/.config/awesome/bin/autostart.sh"
 }
 for i,cmd in ipairs(autostart_list)
 do	
