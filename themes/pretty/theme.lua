@@ -61,8 +61,8 @@ theme.taglist_font = "Material Icons 17"
 -- notification_[border_color|border_width|shape|opacity]
 theme.notification_opacity      = 0.7
 theme.notification_font         = "Noto Sans 10"
-theme.notification_width        = 300
-theme.notification_height       = 80
+-- theme.notification_width        = 300
+-- theme.notification_height       = 80
 theme.notification_margin       = 20
 theme.notification_border_color = theme.bg_normal
 
@@ -76,6 +76,7 @@ theme.notification_border_color = theme.bg_normal
 --theme.bg_widget = "#cc0000"
 
 theme.hotkeys_font = "Fira Code 11"
+theme.hotkeys_modifiers_fg = "#dddddd"
 theme.hotkeys_description_font = "Fira Code 9"
 
 -- Define the wallpaper to load

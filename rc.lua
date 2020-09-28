@@ -1,3 +1,6 @@
+-- vim:fileencoding=utf-8:ft=lua:foldmethod=marker
+
+-- {{{ Imports
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
@@ -11,38 +14,12 @@ local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
-local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local icontheme = require("menubar.icon_theme")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
-
-
--- {{{ Error handling
--- Check if awesome encountered an error during startup and fell back to
--- another config (This code will only ever execute for the fallback config)
-if awesome.startup_errors then
-   naughty.notify({ preset = naughty.config.presets.critical,
-		    title = "Oops, there were berrors during startup!",
-		    text = awesome.startup_errors })
-end
-
--- Handle runtime errors after startup
-do
-   local in_error = false
-   awesome.connect_signal("debug::error", function (err)
-			     -- Make sure we don't go into an endless error loop
-			     if in_error then return end
-			     in_error = true
-
-			     naughty.notify({ preset = naughty.config.presets.critical,
-					      title = "Oops, an error happened!",
-					      text = tostring(err) })
-			     in_error = false
-   end)
-end
 -- }}}
 
 -- {{{ Variable definitions
@@ -96,7 +73,6 @@ awful.layout.layouts = {
 }
 -- }}}
 
--- {{{ Menu
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout{
    font = "Noto Sans  10"
@@ -334,6 +310,10 @@ globalkeys = gears.table.join(
 	 awful.util.spawn("xbacklight -dec 10") end),
    awful.key({ }, "XF86MonBrightnessUp", function ()
 	 awful.util.spawn("xbacklight -inc 10") end),
+   awful.key({ modkey, "Shift" }, "n", function ()
+     awful.spawn.with_shell("bash -c 'kill -s USR1 $(pidof deadd-notification-center)'")
+     end,
+     {description="show notifications", group="apps"}),
    awful.key({ modkey, "Shift" }, "s",      hotkeys_popup.show_help,
       {description="show help", group="awesome"}),
    awful.key({ modkey, "Mod1" }, "l", function ()
@@ -599,9 +579,6 @@ awful.rules.rules = {
       rule = {requests_no_titlebar = true},
       properties = {titlebars_enabled = false}
    },
-   -- Set Firefox to always map on the tag named "2" on screen 1.
-   -- { rule = { class = "Firefox" },
-   --   properties = { screen = 1, tag = "2" } },
 }
 -- }}}
 
@@ -628,24 +605,6 @@ client.connect_signal("manage", function (c)
 			 end
 end)
 
--- Set default notifications icon
-naughty.connect_signal("request::icon", function(n, context, hints)
-    if context ~= "app_icon" then return end
-
-    local path = icon_theme:find_icon_path(hints.app_icon) or
-        menubar.utils.lookup_icon_uncached(hints.app_icon:lower())
-
-    if path then
-        n.icon = path
-    else
-	n.icon = "/usr/share/icons/Papirus-Dark/24x24/actions/hook-notifier.svg"
-    end
-end)
-
-naughty.connect_signal("request::action_icon", function(a, context, hints)
-     a.icon = menubar.utils.lookup_icon(hints.id)
-end)
-
 -- Enable sloppy focus, so that focus follows mouse.
 client.connect_signal("mouse::enter", function(c)
 			 c:emit_signal("request::activate", "mouse_enter", {raise = false})
@@ -657,6 +616,7 @@ end)
 autostart_list = {
    "compton -b --config ~/.config/awesome/compton.conf",
    "volumeicon",
+   "deadd-notification-center",
    "xss-lock i3lock-next",
    "/usr/lib/xfce-polkit/xfce-polkit",
    "blueman-applet",
