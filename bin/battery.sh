@@ -26,4 +26,4 @@ else
 	    ;;
     esac
 fi
-echo "  ${POWER}%     $(xbacklight -get | python -c 'print(int(float(input())))')%"
+echo "  ${POWER}%     $(xbacklight -get | python -c 'print(int(float(input())))')%   $(sensors | grep 'Core 0' | cut -d" " -f10)"
