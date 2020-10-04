@@ -4,6 +4,7 @@ BATTERY_PATH="/sys/class/power_supply/${BATTERY}/"
 POWER=$(cat ${BATTERY_PATH}/capacity)
 STATUS=$(cat ${BATTERY_PATH}/status)
 
+echo -n "<span foreground=\"#25de78\">"
 if [[ "$STATUS" == "Charging" ]]
 then
     echo -n "⚡"
@@ -26,4 +27,7 @@ else
 	    ;;
     esac
 fi
-echo "  ${POWER}%     $(xbacklight -get | python -c 'print(int(float(input())))')%   $(sensors | grep 'Core 0' | cut -d" " -f10)"
+echo -n "</span>  ${POWER}%  "
+echo -n "<span foreground=\"#fcfc33\"></span>  $(xbacklight -get | python -c 'print(int(float(input())))')%  "
+echo -n "<span foreground=\"#3285fe\"></span>  $(sensors | grep 'Core 0' | cut -d" " -f10)"
+echo -n "  "

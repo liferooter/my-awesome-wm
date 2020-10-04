@@ -12,7 +12,7 @@ local themes_path = "~/.config/awesome/themes/"
 
 local theme = {}
 
-theme.font          = "Noto Sans 8"
+theme.font          = "Noto Sans 15"
 
 theme.bg_normal     = "#22222288"
 theme.bg_focus      = "#4545bb"
@@ -78,7 +78,7 @@ theme.hotkeys_modifiers_fg = "#dddddd"
 theme.hotkeys_description_font = "Fira Code 9"
 
 -- Define the wallpaper to load
-theme.wallpaper = themes_path.."pretty/background.jpg"
+theme.wallpaper = themes_path.."pretty/background.png"
 
 -- You can use your own layout icons like this:
 theme.layout_fairh = themes_path.."pretty/layouts/fairh.png"

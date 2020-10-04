@@ -62,9 +62,9 @@ awful.layout.layouts = {
    awful.layout.suit.fair,
    awful.layout.suit.fair.horizontal,
    awful.layout.suit.spiral,
-   awful.layout.suit.spiral.dwindle,
+   -- awful.layout.suit.spiral.dwindle,
    awful.layout.suit.max,
-   --   awful.layout.suit.max.fullscreen,
+   awful.layout.suit.max.fullscreen,
    awful.layout.suit.magnifier,
    awful.layout.suit.corner.nw,
    awful.layout.suit.corner.ne,
@@ -73,20 +73,9 @@ awful.layout.layouts = {
 }
 -- }}}
 
--- Keyboard map indicator and switcher
-mykeyboardlayout = awful.widget.keyboardlayout{
-   font = "Noto Sans  10"
-}
-
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
-local month_calendar = awful.widget.calendar_popup.month()
-month_calendar:attach( mytextclock, 'tr' )
-
-mywifi = wibox.widget.imagebox{
-   
-}
+mytextclock = wibox.widget.textclock("<b>%H\n%M</b>")
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -186,7 +175,7 @@ awful.screen.connect_for_each_screen(function(s)
          style    = {
             border_width = 1,
             border_color = '#777777',
-            shape        = gears.shape.rounded_rect,
+            shape        = gears.shape.rectangle,
          },
          layout   = {
             spacing = 3,
@@ -246,14 +235,15 @@ awful.screen.connect_for_each_screen(function(s)
          },
       }
       
-      s.mybattery_text = wibox.widget.textbox()
-      s.mybattery_text.font = "Font Awesome 10"
+      s.myindicator_text = wibox.widget.textbox()
+      s.myindicator_text.font = "Font Awesome 12"
+      s.myindicator_text.fg = "#2375fe"
       
-      s.mybattery = awful.widget.watch("bash -c \"~/.config/awesome/bin/battery.sh\"", 1,
+      s.myindicator = awful.widget.watch("bash -c \"~/.config/awesome/bin/battery.sh\"", 1,
                                        function (widget, stdout)
-                                          widget:set_text(stdout)
+                                          widget.markup = stdout
                                        end,
-                                       s.mybattery_text
+                                       s.myindicator_text
       )
       
       s.mysystray = wibox.widget.systray{
@@ -267,29 +257,25 @@ awful.screen.connect_for_each_screen(function(s)
       -- Add widgets to the wibox
       s.mywibox_top:setup {
          layout = wibox.layout.align.horizontal,
-         { -- Left widgets
+         {
             layout = wibox.layout.fixed.horizontal,
-            -- {
-            -- widget = wibox.widget.textbox,
-            -- font = "Material Icons 20",
-            -- text = "",
-            -- forced_width = 40,
-            -- align = "center",
-            -- fg_color = "#ffffff"
-            -- },
             s.mypromptbox,
          },
-         s.mytasklist, -- Middle widget
-         { -- Right widgets
+         s.mytasklist,
+         {
             layout = wibox.layout.fixed.horizontal,
             {
-               s.mybattery,
+               s.myindicator,
                widget = wibox.container.margin,
                top = 3,
                right = 10,
             },
-            mykeyboardlayout,
-            mytextclock,
+            {
+               widget = wibox.widget.separator,
+               orientation = "vertical",
+               thickness = 0,
+               forced_width = 10,
+            },
             s.mylayoutbox,
          },
       }
@@ -302,6 +288,12 @@ awful.screen.connect_for_each_screen(function(s)
          {
             layout = wibox.layout.fixed.vertical,
             s.mysystray,
+            {
+               mytextclock,
+               widget = wibox.container.margin,
+               left = 10,
+               bottom = 10,
+            },
          },
          layout = wibox.layout.align.vertical,
       }
@@ -322,7 +314,7 @@ globalkeys = gears.table.join(
    awful.key({ modkey, "Shift" }, "s",      hotkeys_popup.show_help,
       {description="show help", group="awesome"}),
    awful.key({ modkey, "Mod1" }, "l", function ()
-         awful.util.spawn("i3lock-next")
+         awful.spawn.with_shell("~/.config/awesome/bin/lock.sh")
                                       end,
       {description = "lock screen", group = "apps"}
    ),
@@ -622,7 +614,9 @@ end)
 autostart_list = {
    "picom -b --config ~/.config/awesome/picom.conf",
    "volumeicon",
+   "gxkb",
    "deadd-notification-center",
+   "xfce4-power-manager",
    "xss-lock ~/.config/awesome/bin/lock.sh",
    "/usr/lib/polkit-kde-authentication-agent-1",  
    "kwalletd5",
