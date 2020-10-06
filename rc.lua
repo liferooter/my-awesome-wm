@@ -20,7 +20,8 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 require("awful.hotkeys_popup.keys")
 -- }}}
 
--- {{{ Variable definitions
+-- {{{ Nice
+
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init("~/.config/awesome/themes/pretty/theme.lua")
 local nice = require("nice")
@@ -34,20 +35,12 @@ nice{
     middle = "title",
     right = {"floating"},
   }
-  
 }
 
--- DEBUG_ONLY {{{
--- local naughty = require("naughty") 
+awesome.set_preferred_icon_size(30)
+-- }}}
 
--- naughty.connect_signal("request::display_error", function(message, startup)
--- naughty.notification {
--- urgency = "critical",
--- title   = "Oops, an error happened"..(startup and " during startup!" or "!"),
--- message = message
--- }
--- end)
---}}}
+-- {{{ Defaults
 
 -- This is used later as the default terminal and editor to run.
 terminal = "kitty"
@@ -80,39 +73,113 @@ awful.layout.layouts = {
 }
 -- }}}
 
--- {{{ Wibar
+-- {{{ Widgets
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock("<b>%H\n%M</b>")
-
-
+-- {{{ Sensors
 mysensors = wibox.container.radialprogressbar()
 mysensors.border_color = "#222222"
 mysensors.color = "#ffffff"
 mysensors.max_value = 70
-mysensors:setup{
-  widget = wibox.container.place,
-  {
+mysensors_icon = wibox.widget{
     widget = wibox.widget.textbox,
     text = "",
     font = "Material Icons 20",
     forced_height = 40
-  }
+} 
+mysensors:setup{
+  widget = wibox.container.place,
+  mysensors_icon
 }
 
+mysensors_label = wibox.widget{
+  widget = wibox.widget.textbox,
+  font = "Radio Space Bitmap 13",
+  fg = "#ffffff"
+}
+
+mysensors_popup = awful.popup{
+  widget = mysensors_label,
+  bg = "#00000000",
+  preferred_positions = "right",
+  x = 70,
+  y = 795,
+  type = 'dock',
+  ontop = false
+}
+
+function update_sensors_icon ()
+    awful.spawn.easy_async_with_shell(
+      "bash -c \"sensors | grep 'Core 0' | cut -d' ' -f10 | tr -d '+' | cut -d'.' -f1\"",
+      function(out)
+        mysensors.value = tonumber(out) - 20
+        mysensors_label.text = tostring(tonumber(out)).."°C"
+      end
+    )
+end
+-- }}}
+-- {{{ Battery
+mybattery_icon = wibox.widget{
+  widget = wibox.widget.textbox,
+  markup = "",
+  font = "Material Icons 20",
+  forced_height = 40
+}
 mybattery = wibox.container.radialprogressbar()
 mybattery.border_color = "#222222"
 mybattery.color = "#ffffff"
 mybattery.max_value = 100
 mybattery:setup{
   widget = wibox.container.place,
-  {
-    widget = wibox.widget.textbox,
-    text = "",
-    font = "Material Icons 20",
-    forced_height = 40
-  }
+  mybattery_icon
 }
 
+mybattery_label = wibox.widget{
+  widget = wibox.widget.textbox,
+  font = "Radio Space Bitmap 13",
+  fg = "#ffffff"
+}
+
+mybattery_popup = awful.popup{
+  widget = mybattery_label,
+  bg = "#00000000",
+  preferred_positions = "right",
+  x = 70,
+  y = 953,
+  type = 'dock',
+  ontop = false
+}
+
+function update_battery_icon()
+  awful.spawn.easy_async_with_shell(
+    "cat /sys/class/power_supply/BAT0/status",
+    function(out)
+      if string.find(out, "Full") or string.find(out, "Unknown")
+      then
+        mybattery.color = "#4545dd"
+        mybattery_icon.markup = "<span foreground=\"#4545bb\"></span>"
+      else
+        mybattery.color = "#ffffff"
+        mybattery_icon.markup = ""
+      end
+    end
+  )
+  awful.spawn.easy_async_with_shell(
+    "cat /sys/class/power_supply/BAT0/capacity",
+    function(out)
+      mybattery_label.text = tostring(tonumber(out)).."%"
+      mybattery.value = tonumber(out)
+    end
+  )
+end
+-- }}}
+-- {{{ Backlight
+mybacklight_icon = wibox.widget{
+  widget = wibox.widget.textbox,
+  text = "",
+  font = "Material Icons 20",
+  forced_height = 40
+}
 mybacklight = wibox.container.radialprogressbar()
 mybacklight.border_color = "#222222"
 mybacklight.color = "#ffffff"
@@ -121,127 +188,155 @@ mybacklight:setup{
   widget = wibox.container.place,
   buttons = gears.table.join(
     awful.button(
+      {}, 1,
+      function ()
+        awful.util.spawn("light -S 100")
+        update_backlight_icon()
+      end
+    ),
+    awful.button(
       {}, 4,
       function ()
-        awful.util.spawn("xbacklight - 10")
-        update_monitors()
+        awful.util.spawn("light -U 10")
+        update_backlight_icon()
       end
     ),
     awful.button(
       {}, 5,
       function ()
-        awful.util.spawn("xbacklight + 10")
-        update_monitors()
+        awful.util.spawn("light -A 10")
+        update_backlight_icon()
       end
     )
   ),
-  {
-    widget = wibox.widget.textbox,
-    text = "",
-    font = "Material Icons 20",
-    forced_height = 40
-  }
+  mybacklight_icon
 }
 
-myaudio = wibox.container.radialprogressbar()
-myaudio.border_color = "#222222"
-myaudio.color = "#ffffff"
-myaudio.max_value = 100
-myaudio:setup{
+mybacklight_label = wibox.widget{
+  widget = wibox.widget.textbox,
+  font = "Radio Space Bitmap 13",
+  fg = "#ffffff"
+}
+
+mybacklight_popup = awful.popup{
+  widget = mybacklight_label,
+  bg = "#00000000",
+  preferred_positions = "right",
+  x = 70,
+  y = 855,
+  type = 'dock',
+  ontop = false
+}
+
+function update_backlight_icon ()
+  awful.spawn.easy_async_with_shell(
+    "bash -c 'xbacklight | cut -d\".\" -f1'",
+    function(out)
+      mybacklight.value = tonumber(out)
+      mybacklight_label.text = tostring(tonumber(out)).."%"
+    end
+  )
+end
+-- }}}
+-- {{{ Volume
+myvolumeicon_icon = wibox.widget{
+  widget = wibox.widget.textbox,
+  text = "",
+  font = "Material Icons 20",
+  forced_height = 40
+}
+myvolumeicon = wibox.container.radialprogressbar()
+myvolumeicon.border_color = "#222222"
+myvolumeicon.color = "#ffffff"
+myvolumeicon.max_value = 100
+myvolumeicon:setup{
   widget = wibox.container.place,
   buttons = gears.table.join(
     awful.button(
       {}, 1,
       function ()
         awful.util.spawn("amixer set Master toggle")
-        update_monitors()
+        update_volume_icon()
+      end
+    ),
+    awful.button(
+      {}, 2,
+      function ()
+        awful.util.spawn("pactl set-sink-volume 0 100%")
+        update_volume_icon()
       end
     ),
     awful.button(
       {}, 4,
       function ()
-        awful.util.spawn("amixer set Master 5%-")
-        update_monitors()
+        awful.util.spawn("pactl set-sink-volume 0 -5%")
+        update_volume_icon()
       end
     ),
     awful.button(
       {}, 5,
       function ()
-        awful.util.spawn("amixer set Master 5%+")
-        update_monitors()
+        awful.util.spawn("pactl set-sink-volume 0 +5%")
+        update_volume_icon()
       end
     )
   ),
-  {
-    widget = wibox.widget.textbox,
-    text = "",
-    font = "Material Icons 20",
-    forced_height = 40
-  }
+  myvolumeicon_icon
 }
-function update_monitors ()
-  -- You should read it from `/sys/class/power_supply/` (on Linux)
-  -- instead of spawning a shell. This is only an example.
+
+myvolumeicon_label = wibox.widget{
+  widget = wibox.widget.textbox,
+  font = "Radio Space Bitmap 13",
+  fg = "#ffffff"
+}
+
+myvolumeicon_popup = awful.popup{
+  widget = myvolumeicon_label,
+  bg = "#00000000",
+  preferred_positions = "right",
+  x = 70,
+  y = 900,
+  type = 'dock',
+  ontop = false
+}
+
+function update_volume_icon ()
   awful.spawn.easy_async_with_shell(
     "bash -c 'amixer | grep Master -A 6 | tail -n 1 | grep \\'\\[on\\]\\' | cut -d\"[\" -f2 | tr -d \"%]\"'",
     function(out)
+      if tonumber(out) > 100
+      then
+        out = tostring(100)
+        awful.util.spawn("pactl set-sink-volume 0 100%")
+      end
+      myvolumeicon_label.text = tostring(tonumber(out) or 0).."%"
       if out == ""
       then
-        myaudio.color = "#666666"
+        myvolumeicon.color = "#666666"
         out = "100"
       else
-        myaudio.color = "#ffffff"
+        myvolumeicon.color = "#ffffff"
       end
-      myaudio.value = tonumber(out)
-    end
-  )
-  awful.spawn.easy_async_with_shell(
-    "bash -c 'xbacklight | cut -d\".\" -f1'",
-    function(out)
-      mybacklight.value = tonumber(out)
+      myvolumeicon.value = tonumber(out)
     end
   )
 end
-
-update_monitors()
 
 gears.timer{
   timeout = 1,
   call_now = true,
   autostart = true,
   callback = function ()
-    update_monitors()
-    awful.spawn.easy_async_with_shell(
-      "bash -c \"sensors | grep 'Core 0' | cut -d' ' -f10 | tr -d '+' | cut -d'.' -f1\"",
-      function(out)
-        mysensors.value = tonumber(out) - 20
-      end
-    )
-    awful.spawn.easy_async_with_shell(
-      "cat /sys/class/power_supply/BAT0/status",
-      function(out)
-        -- if out == "Charging"
-        -- then
-        -- mybattery.children[1].text = ""
-        -- else
-        -- mybattery.children[1].text = ""
-        -- end
-      end
-    )
-    awful.spawn.easy_async_with_shell(
-      "cat /sys/class/power_supply/BAT0/capacity",
-      function(out)
-        mybattery.value = tonumber(out)
-        -- if tonumber(out) < 10
-        -- then
-        -- mybattery.children[1].text = ""
-        -- end
-      end
-    )
+    update_battery_icon()
+    update_backlight_icon()
+    update_volume_icon()
+    update_sensors_icon()
   end
 }
 
--- Create a wibox for each screen and add it
+--- }}}
+
+-- {{{ Taglist buttons
 local taglist_buttons = gears.table.join(
   awful.button({ }, 1, function(t) t:view_only() end),
   awful.button({ modkey }, 1, function(t)
@@ -258,7 +353,8 @@ local taglist_buttons = gears.table.join(
   awful.button({ }, 4, function(t) awful.tag.viewnext(t.screen) end),
   awful.button({ }, 5, function(t) awful.tag.viewprev(t.screen) end)
 )
-
+-- }}}
+-- {{{ Tasklist buttons
 local tasklist_buttons = gears.table.join(
   awful.button({ }, 1, function (c)
       if c == client.focus then
@@ -281,7 +377,8 @@ local tasklist_buttons = gears.table.join(
   awful.button({ }, 5, function ()
       awful.client.focus.byidx(-1)
 end))
-
+-- }}}
+-- {{{ Wallpaper
 local function set_wallpaper(s)
   -- Wallpaper
   if beautiful.wallpaper then
@@ -293,9 +390,8 @@ local function set_wallpaper(s)
     gears.wallpaper.maximized(wallpaper, s, true)
   end
 end
-
-
-
+-- }}}
+-- {{{ Per-screen
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
@@ -460,7 +556,7 @@ awful.screen.connect_for_each_screen(function(s)
               widget = wibox.container.background,
               bg = beautiful.bg_normal,
               shape = gears.shape.circle,
-              myaudio
+              myvolumeicon
             }
           },
           {
@@ -626,29 +722,33 @@ end)
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
+  awful.key({ modkey, "Shift" }, "n", function ()
+      awful.spawn.with_shell("bash -c 'kill -s USR1 $(pidof deadd-notification-center)'")
+                                      end,
+    { description = "show notification center", group = "apps" }),
   -- Volume
   awful.key({ }, "XF86AudioRaiseVolume", function ()
-      awful.util.spawn("amixer set Master 5%+")
-      update_monitors()
+      awful.util.spawn("pactl set-sink-volume 0 +5%")
+      update_volume_icon()
   end),
    awful.key({ }, "XF86AudioLowerVolume", function ()
-       awful.util.spawn("amixer set Master 5%-")
-       update_monitors()
+       awful.util.spawn("pactl set-sink-volume 0 -5%")
+       update_volume_icon()
    end),
    awful.key({ }, "XF86AudioMute", function ()
-       awful.util.spawn("amixer sset Master toggle")
-       update_monitors()
+       awful.util.spawn("amixer set Master toggle")
+       update_volume_icon()
    end),
   -- Brightness
   awful.key({ }, "XF86MonBrightnessDown", function ()
-      awful.util.spawn("xbacklight -dec 10")
-      update_monitors()
+      awful.util.spawn("light -U 10")
+      update_backlight_icon()
   end),
   awful.key({ }, "XF86MonBrightnessUp", function ()
-      awful.util.spawn("xbacklight -inc 10")
-      update_monitors()
+      awful.util.spawn("light -A 10")
+      update_backlight_icon()
   end),
-  awful.key({ modkey, "Shift" }, "s",      hotkeys_popup.show_help,
+  awful.key({ modkey, "Mod1" }, "h",      hotkeys_popup.show_help,
     {description="show help", group="awesome"}),
   awful.key({ modkey, "Mod1" }, "l", function ()
       awful.spawn.with_shell("~/.config/awesome/bin/lock.sh")
