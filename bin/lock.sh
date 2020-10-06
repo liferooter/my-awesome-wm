@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-B='#1099bbff'  # blank
+B='#4545bb22'  # blank
 C='#ffffff22'  # clear ish
-D='#00ffffcc'  # default
-T='#00eeeeee'  # text
+D='#4545bbcc'  # default
+T='#ffffffff'  # text
 W='#880000bb'  # wrong
-V='#00bbbbbb'  # verifying
+V='#45bbbbbb'  # verifying
 
 i3lock \
 --insidevercolor=$C   \
@@ -33,6 +33,6 @@ i3lock \
 --timestr="%H:%M:%S"  \
 --datestr="%A, %m %Y" \
 --keylayout 2        \
---image ~/.config/awesome/themes/pretty/background.jpg \
 -e \
+--image ~/.config/awesome/bin/locker.png \
 -C

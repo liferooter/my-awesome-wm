@@ -7,16 +7,14 @@ pcall(require, "luarocks.loader")
 
 -- Standard awesome library
 local gears = require("gears")
-local awful = require("awful")
+awful = require("awful")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
-local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
-local icontheme = require("menubar.icon_theme")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
@@ -25,9 +23,7 @@ require("awful.hotkeys_popup.keys")
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init("~/.config/awesome/themes/pretty/theme.lua")
-
-
-local nice = require('nice')
+local nice = require("nice")
 nice{
    no_titlebar_maximized = true,
    floating_color = "#0077ff",
@@ -38,12 +34,11 @@ nice{
       middle = "title",
       right = {"floating"},
    }
+   
 }
 
 -- This is used later as the default terminal and editor to run.
 terminal = "kitty"
-menubar.utils.terminal = terminal
-icon_theme = icontheme.new("Papirus-Dark", {"~/.local/share/icons", "~/.icons", "/usr/share/icons"})
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -77,6 +72,66 @@ awful.layout.layouts = {
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock("<b>%H\n%M</b>")
 
+
+mysensors = wibox.container.radialprogressbar()
+mysensors.border_color = "#222222"
+mysensors.color = "#ffffff"
+mysensors.max_value = 70
+mysensors:setup{
+   widget = wibox.container.place,
+   {
+      widget = wibox.widget.textbox,
+      text = "",
+      font = "Material Icons 20",
+      forced_height = 40
+   }
+}
+gears.timer {
+    timeout   = 10,
+    call_now  = true,
+    autostart = true,
+    callback  = function()
+        -- You should read it from `/sys/class/power_supply/` (on Linux)
+        -- instead of spawning a shell. This is only an example.
+        awful.spawn.easy_async_with_shell(
+           -- "echo 30",
+            "bash -c \"sensors | grep 'Core 0' | cut -d' ' -f10 | tr -d '+' | cut -d'.' -f1\"",
+            function(out)
+                mysensors.value = tonumber(out) - 20
+            end
+        )
+    end
+}
+
+mybattery = wibox.container.radialprogressbar()
+mybattery.border_color = "#222222"
+mybattery.color = "#ffffff"
+mybattery.max_value = 100
+mybattery:setup{
+   widget = wibox.container.place,
+   {
+      widget = wibox.widget.textbox,
+      text = "",
+      font = "Material Icons 20",
+      forced_height = 40
+   }
+}
+gears.timer {
+    timeout   = 10,
+    call_now  = true,
+    autostart = true,
+    callback  = function()
+        -- You should read it from `/sys/class/power_supply/` (on Linux)
+        -- instead of spawning a shell. This is only an example.
+        awful.spawn.easy_async_with_shell(
+            "cat /sys/class/power_supply/BAT0/capacity",
+            function(out)
+                mybattery.value = tonumber(out)
+            end
+        )
+    end
+}
+
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
    awful.button({ }, 1, function(t) t:view_only() end),
@@ -105,6 +160,7 @@ local tasklist_buttons = gears.table.join(
                "tasklist",
                {raise = true}
             )
+            awful.client.jumpto(c)
          end
    end),
    awful.button({ }, 3, function()
@@ -129,6 +185,8 @@ local function set_wallpaper(s)
    end
 end
 
+
+
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
@@ -143,12 +201,17 @@ awful.screen.connect_for_each_screen(function(s)
       s.mypromptbox = awful.widget.prompt()
       -- Create an imagebox widget which will contain an icon indicating which layout we're using.
       -- We need one layoutbox per screen.
-      s.mylayoutbox = awful.widget.layoutbox(s)
-      s.mylayoutbox:buttons(gears.table.join(
-                               awful.button({ }, 1, function () awful.layout.inc( 1) end),
-                               awful.button({ }, 3, function () awful.layout.inc(-1) end),
-                               awful.button({ }, 4, function () awful.layout.inc( 1) end),
-                               awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+      s.mylayoutbox = awful.widget.layoutbox{
+         screen = s,
+         buttons = {
+            awful.button({ }, 1, function () awful.layout.inc( 1) end),
+            awful.button({ }, 3, function () awful.layout.inc(-1) end),
+            awful.button({ }, 4, function () awful.layout.inc( 1) end),
+            awful.button({ }, 5, function () awful.layout.inc(-1) end)
+         },
+         forced_height = 40,
+         forced_width = 40,
+      }
       -- Create a taglist widget
       s.mytaglist = awful.widget.taglist {
          screen  = s,
@@ -159,6 +222,7 @@ awful.screen.connect_for_each_screen(function(s)
                id         = 'text_role',
                align     = "center",
                forced_height = 40,
+               forced_width = 40,
                widget    = wibox.widget.textbox
             },
             id     = 'background_role',
@@ -167,135 +231,262 @@ awful.screen.connect_for_each_screen(function(s)
          buttons = taglist_buttons
       }
 
-      -- Create a tasklist widget
       s.mytasklist = awful.widget.tasklist {
          screen   = s,
-         filter   = awful.widget.tasklist.filter.currenttags,
+         filter   = awful.widget.tasklist.filter.alltags,
          buttons  = tasklist_buttons,
-         style    = {
-            border_width = 1,
-            border_color = '#777777',
-            shape        = gears.shape.rectangle,
-         },
          layout   = {
-            spacing = 3,
-            spacing_widget = {
-               {
-                  forced_width = 0,
-                  shape        = gears.shape.circle,
-                  widget       = wibox.widget.separator
-               },
-               valign = 'center',
-               halign = 'center',
-               widget = wibox.container.place,
-            },
-            layout  = wibox.layout.fixed.horizontal
+            spacing = 1,
+            layout  = wibox.layout.fixed.vertical
          },
          -- Notice that there is *NO* wibox.wibox prefix, it is a template,
          -- not a widget instance.
          widget_template = {
             {
                {
-                  {
-                     {
-                        id     = 'clienticon',
-                        widget = awful.widget.clienticon,
-                     },
-                     margins = 5,
-                     widget  = wibox.container.margin,
-                  },
-                  {
-                     id     = 'text_role',
-                     widget = wibox.widget.textbox,
-                  },
-                  {
-                     id = "close_button",
-                     text = "",
-                     font = "Material Icons 15",
-                     widget = wibox.widget.textbox,
-                  },
-                  layout = wibox.layout.align.horizontal,
+                  widget = wibox.container.margin,
+                  margins = 1,
+                  awful.widget.clienticon
                },
-               left  = 10,
-               right = 10,
-               widget = wibox.container.margin
+               widget = wibox.container.background,
+               id = "background_role",
             },
-            forced_width = 300,
-            id     = 'background_role',
-            widget = wibox.container.background,
-            create_callback = function (self, c, index, clients)
-               local closer = self:get_children_by_id('close_button')[1]
-               closer:connect_signal("button::press",
-                                     function (self, lx, ly, b, m, r)
-                                        self.client:kill()
-                                     end
-               )
-               closer.client = c
-            end
-         },
+            widget = wibox.container.margin,
+            margins = 1
+         }
       }
-      
-      s.myindicator_text = wibox.widget.textbox()
-      s.myindicator_text.font = "Font Awesome 12"
-      s.myindicator_text.fg = "#2375fe"
-      
-      s.myindicator = awful.widget.watch("bash -c \"~/.config/awesome/bin/battery.sh\"", 1,
-                                       function (widget, stdout)
-                                          widget.markup = stdout
-                                       end,
-                                       s.myindicator_text
-      )
+
       
       s.mysystray = wibox.widget.systray{
-         forced_width     = 30,
+         base_size     = 40,
+         forced_width = 40,
+         reverse = true
       }
-      
       s.mysystray:set_horizontal(false)
+      
       -- Create the wibox
-      s.mywibox_top = awful.wibar({ position = "top", screen = s, height = 40 })
+      
+      s.mywibox_left = awful.wibar({ position = "left", screen = s, width = 60, bg = "#00000000", type = "dock" })
+      s.mywibox_right = awful.wibar({ position = "right", screen = s, width = 60, bg = "#00000000", type = "dock" })
 
-      -- Add widgets to the wibox
-      s.mywibox_top:setup {
-         layout = wibox.layout.align.horizontal,
+      s.mywibox_left:setup{
+         widget = wibox.container.background(),
          {
-            layout = wibox.layout.fixed.horizontal,
-            s.mypromptbox,
-         },
-         s.mytasklist,
-         {
-            layout = wibox.layout.fixed.horizontal,
+            layout = wibox.layout.align.vertical,
             {
-               s.myindicator,
-               widget = wibox.container.margin,
-               top = 3,
-               right = 10,
+               layout = wibox.layout.fixed.vertical,
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  top = 10,
+                  s.mylayoutbox,
+               },
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  top = 10,
+                  {
+                     widget = wibox.container.background,
+                     shape = gears.shape.rounded_rect,
+                     bg = beautiful.bg_normal,
+                     s.mytaglist,
+                  }
+               },
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  top = 10,
+                  {
+                     widget = wibox.container.background,
+                     bg = beautiful.bg_normal,
+                     shape = gears.shape.rounded_rect,
+                     {
+                        widget = wibox.container.place,
+                        {
+                           widget = wibox.container.margin,
+                           top = 10,
+                           bottom = 10,
+                           awful.widget.keyboardlayout
+                        }
+                     }
+                  }
+               }
             },
+            nil,
             {
-               widget = wibox.widget.separator,
-               orientation = "vertical",
-               thickness = 0,
-               forced_width = 10,
-            },
-            s.mylayoutbox,
-         },
+               layout = wibox.layout.fixed.vertical,
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  bottom = 10,
+                  {
+                     widget = wibox.container.background,
+                     bg = beautiful.bg_normal,
+                     shape = gears.shape.circle,
+                     mysensors
+                  }
+               },
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  bottom = 10,
+                  {
+                     widget = wibox.container.background,
+                     bg = beautiful.bg_normal,
+                     shape = gears.shape.circle,
+                     mybattery
+                  }
+               },
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  bottom = 10,
+                  {
+                     widget = wibox.container.background,
+                     bg = beautiful.bg_normal,
+                     shape = gears.shape.rounded_rect,
+                     {
+                        widget = wibox.container.place,
+                        {
+                           widget = wibox.container.margin,
+                           top = 10,
+                           bottom = 10,
+                           mytextclock
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
 
-      s.mywibox_left = awful.wibar({ position = "left", screen = s, width = 40})
-      
-      s.mywibox_left:setup {
-         s.mytaglist,
-         nil,
+      s.mywibox_right:setup{
+         widget = wibox.container.background(),
          {
-            layout = wibox.layout.fixed.vertical,
-            s.mysystray,
+            layout = wibox.layout.align.vertical,
             {
-               mytextclock,
-               widget = wibox.container.margin,
-               left = 10,
-               bottom = 10,
+               layout = wibox.layout.fixed.vertical,
+               {
+                  widget = wibox.container.margin,
+                  top = 10,
+                  right = 10,
+                  left = 10,
+                  {
+                     widget = wibox.container.background,
+                     shape = gears.shape.rounded_rect,
+                     bg = beautiful.bg_normal,
+                     height = 40,
+                     width = 40,
+                     {
+                        widget = wibox.widget.textbox,
+                        buttons = gears.table.join({
+                              awful.button({}, 1,
+                                 function ()
+                                    awful.spawn.with_shell("~/.config/awesome/bin/power.sh")
+                                 end
+                              )
+                        }),
+                        text = "",
+                        font = "Material Icons 30"
+                     }
+                  },
+               },
+               {
+                  widget = wibox.container.margin,
+                  top = 10,
+                  right = 10,
+                  left = 10,
+                  {
+                     widget = wibox.container.background,
+                     shape = gears.shape.rounded_rect,
+                     bg = beautiful.bg_normal,
+                     height = 40,
+                     width = 40,
+                     {
+                        widget = wibox.widget.textbox,
+                        buttons = gears.table.join({
+                              awful.button({}, 1,
+                                 function ()
+                                    awful.spawn.with_shell("pkill rofi || rofi -normal-window -show")
+                                 end
+                              )
+                        }),
+                        text = "",
+                        font = "Material Icons 30"
+                     }
+                  },
+               },
             },
-         },
-         layout = wibox.layout.align.vertical,
+            {
+               widget = wibox.container.margin,
+               top = 10,
+               left = 10,
+               right = 10,
+               bottom = 10,
+               {
+                  widget = wibox.container.background,
+                  shape = gears.shape.rounded_rect,
+                  bg = beautiful.bg_normal,
+                  width = 40,
+                  {
+                     widget = wibox.container.margin,
+                     s.mytasklist
+                  }
+               }
+            },
+            {
+               layout = wibox.layout.fixed.vertical,
+               {
+                  widget = wibox.container.margin,
+                  bottom = 10,
+                  right = 10,
+                  left = 10,
+                  {
+                     widget = wibox.container.background,
+                     shape = gears.shape.rounded_rect,
+                     bg = beautiful.bg_normal,
+                     height = 40,
+                     width = 40,
+                     {
+                        widget = wibox.widget.textbox,
+                        buttons = gears.table.join({
+                              awful.button({}, 1,
+                                 function ()
+                                    awful.spawn.with_shell("onboard")
+                                 end
+                              )
+                        }),
+                        text = "",
+                        font = "Material Icons 30"
+                     }
+                  },
+               },
+               {
+                  widget = wibox.container.margin,
+                  left = 10,
+                  right = 10,
+                  bottom = 10,
+                  {
+                     widget = wibox.container.background,
+                     shape = gears.shape.rounded_rect,
+                     bg = beautiful.bg_normal,
+                     {
+                        widget = wibox.container.margin,
+                        top = 15,
+                        bottom = 15,
+                        left = 2,
+                        s.mysystray
+                     }
+                  }
+               }
+            }
+         }
       }
 end)
 -- }}}
@@ -307,10 +498,6 @@ globalkeys = gears.table.join(
          awful.util.spawn("xbacklight -dec 10") end),
    awful.key({ }, "XF86MonBrightnessUp", function ()
          awful.util.spawn("xbacklight -inc 10") end),
-   awful.key({ modkey, "Shift" }, "n", function ()
-         awful.spawn.with_shell("bash -c 'kill -s USR1 $(pidof deadd-notification-center)'")
-                                       end,
-      {description="show notifications", group="apps"}),
    awful.key({ modkey, "Shift" }, "s",      hotkeys_popup.show_help,
       {description="show help", group="awesome"}),
    awful.key({ modkey, "Mod1" }, "l", function ()
@@ -378,49 +565,36 @@ globalkeys = gears.table.join(
    awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(-1)                end,
       {description = "select previous", group = "layout"}),
 
+   -- Applications
+   awful.key({ modkey }, "p", function() awful.spawn.with_shell("pkill rofi || rofi -normal-window -show") end,
+      {description = "show rofi menu", group = "apps"}),
+   awful.key({ modkey }, "c", function() awful.util.spawn("rofi -normal-window -show calc") end,
+      {description = "show rofi calculator", group = "apps"}),
+   awful.key({ modkey }, "b", function() awful.util.spawn("bwmenu") end,
+      {description = "show Bitwarden", group = "apps"}),
+   awful.key({ modkey, "Shift" }, "p", function() awful.spawn.with_shell("~/.config/awesome/bin/power.sh") end,
+      {description = "show power menu", group = "apps"}),
+   awful.key({ }, "Print", function() awful.util.spawn("flameshot gui") end,
+      {description = "take screenshot", group = "apps"}),
    awful.key({ modkey, "Control" }, "n",
       function ()
          local c = awful.client.restore()
          -- Focus restored client
          if c then
-            c:emit_signal(
-               "request::activate", "key.unminimize", {raise = true}
-            )
+            c:activate { raise = true, context = "key.unminimize" }
          end
       end,
-      {description = "restore minimized", group = "client"}),
-
-   -- Prompt
-   awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
-      {description = "run prompt", group = "launcher"}),
-
-   awful.key({ modkey }, "x",
-      function ()
-         awful.prompt.run {
-            prompt       = "Run Lua code: ",
-            textbox      = awful.screen.focused().mypromptbox.widget,
-            exe_callback = awful.util.eval,
-            history_path = awful.util.get_cache_dir() .. "/history_eval"
-         }
-      end,
-      {description = "lua execute prompt", group = "awesome"}),
-   -- Applications
-   awful.key({ modkey }, "p", function() awful.util.spawn("ulauncher-toggle") end,
-      {description = "show Ulauncher", group = "apps"}),
-   awful.key({ }, "Print", function() awful.util.spawn("flameshot gui") end,
-      {description = "take screenshot", group = "apps"})
+      {description = "restore minimized", group = "client"})
 )
 
 clientkeys = gears.table.join(
-   awful.key({modkey, "Shift"}, "f",
+   awful.key({ modkey,           }, "n",
       function (c)
-         if (c:titlebar_top():geometry()['height'] > 0) then
-            awful.titlebar(c, {size = 0})
-         else
-            c:emit_signal("request::titlebars")
-         end
-      end,
-      {description = "toggle titlebar", group = "client"}),
+         -- The client currently has the input focus, so it cannot be
+         -- minimized, since minimized clients can't have the focus.
+         c.minimized = true
+      end ,
+      {description = "minimize", group = "client"}),
    awful.key({ modkey,           }, "f",
       function (c)
          c.fullscreen = not c.fullscreen
@@ -437,13 +611,6 @@ clientkeys = gears.table.join(
       {description = "move to screen", group = "client"}),
    awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
       {description = "toggle keep on top", group = "client"}),
-   awful.key({ modkey,           }, "n",
-      function (c)
-         -- The client currently has the input focus, so it cannot be
-         -- minimized, since minimized clients can't have the focus.
-         c.minimized = true
-      end ,
-      {description = "minimize", group = "client"}),
    awful.key({ modkey,           }, "m",
       function (c)
          c.maximized = not c.maximized
@@ -585,6 +752,18 @@ awful.rules.rules = {
       rule = {requests_no_titlebar = true},
       properties = {titlebars_enabled = false}
    },
+   {
+      rule = {instance = "onboard"},
+      properties = {focusable = false}
+   },
+   {
+      rule = {instance = "onboard-settings"},
+      properties = {focusable = true}
+   },
+   {
+      rule = {instance = "rofi"},
+      properties = {ontop = true, floating = true, placement = awful.placement.top}
+   }
 }
 -- }}}
 
@@ -601,6 +780,7 @@ client.connect_signal("manage", function (c)
                             -- Prevent clients from being unreachable after screen count changes.
                             awful.placement.no_offscreen(c)
                          end
+                         
 end)
 
 -- Enable sloppy focus, so that focus follows mouse.
@@ -614,15 +794,15 @@ end)
 autostart_list = {
    "picom -b --config ~/.config/awesome/picom.conf",
    "volumeicon",
-   "gxkb",
-   "deadd-notification-center",
    "xfce4-power-manager",
    "xss-lock ~/.config/awesome/bin/lock.sh",
    "/usr/lib/polkit-kde-authentication-agent-1",  
    "kwalletd5",
    "blueman-applet",
    "nm-applet",
-   "~/.config/awesome/bin/autostart.sh"
+   "~/.config/awesome/bin/autostart.sh",
+   "~/.config/awesome/bin/powerbtn.sh",
+   "tilda",
 }
 for i,cmd in ipairs(autostart_list)
 do    
@@ -631,6 +811,6 @@ do
    if firstplace then
       findme = cmd:sub(0, firstplace - 1)
    end
-   awful.spawn.with_shell(string.format('pgrep -u $USER -x %s > /dev/null || %s', findme, cmd))
+   awful.spawn.with_shell(string.format('pidof -x %s > /dev/null || %s', findme, cmd))
 end
 --- }}}

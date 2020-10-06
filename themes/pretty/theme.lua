@@ -14,27 +14,30 @@ local theme = {}
 
 theme.font          = "Noto Sans 15"
 
-theme.bg_normal     = "#22222288"
+theme.bg_normal     = "#222222"
 theme.bg_focus      = "#4545bb"
 theme.bg_urgent     = "#ff0000"
 theme.bg_minimize   = "#444444"
-theme.bg_systray    = "#15151500"
 
-theme.fg_normal     = "#aaaaaa"
+-- theme.bg_systray    = "#000000"
+
+theme.fg_normal     = "#ffffff"
 theme.fg_focus      = "#ffffff"
 theme.fg_urgent     = "#ffffff"
 theme.fg_minimize   = "#ffffff"
 
-theme.useless_gap   = dpi(5)
+theme.useless_gap   = dpi(7)
 theme.gap_single_client = false
 theme.border_width  = dpi(0)
+theme.border_color_normal = "#00000000"
+theme.border_color_active = "#99999977"
 
-theme.tasklist_bg_focus = "#666666aa"
-theme.tasklist_bg_normal = "#444444aa"
-theme.tasklist_font     = "Noto Sans 11"
-theme.tasklist_plain_task_name = true
+theme.tasklist_bg_focus = "#ffffff"
+theme.tasklist_shape = gears.shape.circle
 
 theme.taglist_fg_occupied = "#ffffff"
+theme.taglist_fg_empty = "#aaaaaa"
+theme.taglist_font = "Material Icons 17"
 -- There are other variable sets
 -- overriding the default one when
 -- defined, the sets are:
@@ -47,7 +50,6 @@ theme.taglist_fg_occupied = "#ffffff"
 -- hotkeys_[bg|fg|border_width|border_color|shape|opacity|modifiers_fg|label_bg|label_fg|group_margin|font|description_font]
 -- Example:
 --theme.taglist_bg_focus = "#ff0000"
-theme.taglist_font = "Material Icons 17"
 
 -- Generate taglist squares:
 -- local taglist_square_size = dpi(4)
@@ -57,12 +59,6 @@ theme.taglist_font = "Material Icons 17"
 -- notification_[bg|fg]
 -- notification_[width|height|margin]
 -- notification_[border_color|border_width|shape|opacity]
-theme.notification_opacity      = 0.7
-theme.notification_font         = "Noto Sans 10"
--- theme.notification_width        = 300
--- theme.notification_height       = 80
-theme.notification_margin       = 20
-theme.notification_border_color = theme.bg_normal
 
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
