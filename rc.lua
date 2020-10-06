@@ -304,19 +304,19 @@ function update_volume_icon ()
   awful.spawn.easy_async_with_shell(
     "bash -c 'amixer | grep Master -A 6 | tail -n 1 | grep \\'\\[on\\]\\' | cut -d\"[\" -f2 | tr -d \"%]\"'",
     function(out)
-      if tonumber(out) > 100
-      then
-        out = tostring(100)
-        awful.util.spawn("pactl set-sink-volume 0 100%")
-      end
-      myvolumeicon_label.text = tostring(tonumber(out) or 0).."%"
-      if out == ""
+      if tonumber(out) == nil
       then
         myvolumeicon.color = "#666666"
         out = "100"
       else
         myvolumeicon.color = "#ffffff"
       end
+      if tonumber(out) > 100
+      then
+        out = tostring(100)
+        awful.util.spawn("pactl set-sink-volume 0 100%")
+      end
+      myvolumeicon_label.text = tostring(tonumber(out) or 0).."%"
       myvolumeicon.value = tonumber(out)
     end
   )
