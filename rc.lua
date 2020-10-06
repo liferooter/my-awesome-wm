@@ -431,7 +431,7 @@ awful.screen.connect_for_each_screen(function(s)
                bottom = 10,
                {
                   widget = wibox.container.background,
-                  shape = gears.shape.rounded_rect,
+                  shape = gears.shape.rounded_bar,
                   bg = beautiful.bg_normal,
                   width = 40,
                   {
