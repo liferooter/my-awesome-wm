@@ -1,6 +1,7 @@
 # my-awesome-wm
 My AwesomeWM configs
-
+![screenshot](Screenshot-1.png)
+![screenshot](Screenshot-2.png)
 ## Dependencies
 ### Required:
 - AwesomeWM - git version
