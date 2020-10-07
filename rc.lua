@@ -355,14 +355,41 @@ end
 screen.connect_signal("property::geometry", set_wallpaper)
 
 awful.screen.connect_for_each_screen(function(s)
-    -- Wallpaper
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
     awful.tag({ "", "", "", "", "", "", "", "I", "" }, s, awful.layout.suit.tile)
 
-    -- Create a promptbox for each screen
-    s.mypromptbox = awful.widget.prompt()
+    s.mysystray = wibox.widget.systray{
+        base_size     = 40,
+        forced_width = 40,
+        reverse = true
+    }
+    s.mysystray:set_horizontal(false)
+    if s.geometry.x == 0 and s.geometry.y == 0
+        then
+            s.mywidget_container = wibox.widget{
+                widget = wibox.container.margin,
+                left = 10,
+                right = 10,
+                bottom = 10,
+                {
+                    widget = wibox.container.background,
+                    shape = gears.shape.rounded_rect,
+                    bg = beautiful.bg_normal,
+                    {
+                        widget = wibox.container.margin,
+                        top = 15,
+                        bottom = 15,
+                        left = 2,
+                        s.mysystray
+                    }
+                }
+            }
+        else
+            s.mywidget_container = nil
+        end
+
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox{
@@ -420,53 +447,50 @@ awful.screen.connect_for_each_screen(function(s)
       }
     }
 
-    
-    s.mysystray = wibox.widget.systray{
-      base_size     = 40,
-      forced_width = 40,
-      reverse = true
-    }
-    s.mysystray:set_horizontal(false)
+    local height = s.geometry.y + s.geometry.height
 
-    s.mysensors_popup = awful.popup{
+    awful.popup{
       widget = mysensors_label,
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = s.geometry.height - 285,
+      y = height - 285,
       type = 'dock',
       ontop = false,
       screen = s
     }
 
-    s.mybattery_popup = awful.popup{
+    awful.popup{
       widget = mybattery_label,
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = s.geometry.height - 127,
+      y = height - 127,
       type = 'dock',
-      ontop = false
+      ontop = false,
+      screen = s
     }
     
-    s.mybacklight_popup = awful.popup{
+    awful.popup{
       widget = mybacklight_label,
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = s.geometry.height - 225,
+      y = height - 225,
       type = 'dock',
-      ontop = false
+      ontop = false,
+      screen = s
     }
 
-    s.myvolumeicon_popup = awful.popup{
+    awful.popup{
       widget = myvolumeicon_label,
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = s.geometry.height - 180,
+      y = height - 180,
       type = 'dock',
-      ontop = false
+      ontop = false,
+      screen = s
     }
 
     -- Create the wibox
@@ -696,24 +720,7 @@ awful.screen.connect_for_each_screen(function(s)
               }
             },
           },
-          {
-            widget = wibox.container.margin,
-            left = 10,
-            right = 10,
-            bottom = 10,
-            {
-              widget = wibox.container.background,
-              shape = gears.shape.rounded_rect,
-              bg = beautiful.bg_normal,
-              {
-                widget = wibox.container.margin,
-                top = 15,
-                bottom = 15,
-                left = 2,
-                s.mysystray
-              }
-            }
-          }
+          s.mywidget_container
         }
       }
     }
@@ -1042,6 +1049,7 @@ end)
 
 -- {{{ Autostart
 autostart_list = {
+  "autorandr horizontal",
   "picom -b --config ~/.config/awesome/picom.conf",
   "xfce4-power-manager",
   "xss-lock ~/.config/awesome/bin/lock.sh",

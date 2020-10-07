@@ -16,6 +16,7 @@ My AwesomeWM configs
 - onboard - good onscreen keyboard, integrated into my UI. You might remove it. (there is just one panel widget for onboard)
 - deadd-notification-center - notification center
 ### Optional:
+- autorandr - for automatic multihead configuration
 - nm-applet - for network applet
 - blueman - for bluetooth configuration
 - kwallet - it is kwallet, you know
