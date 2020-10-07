@@ -36,6 +36,7 @@ My AwesomeWM configs
 - Capitaine cursors - my curcor theme
 - Flameshot - the best screenshot utility for Linux
 - Redshift - make your display warm
+- playerctl - control your player
 
 ## Installation
 1. Clone my repo with submodules to ~/.config/awesome:
