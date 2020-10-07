@@ -985,6 +985,7 @@ autostart_list = {
   "~/.config/awesome/bin/autostart.sh",
   "~/.config/awesome/bin/powerbtn.sh",
   "tilda",
+  "redshift-gtk"
 }
 for i,cmd in ipairs(autostart_list)
 do    
