@@ -116,56 +116,6 @@ function update_sensors_icon ()
     )
 end
 -- }}}
--- {{{ Battery
-mybattery_icon = wibox.widget{
-  widget = wibox.widget.imagebox,
-  image = beautiful.icon_battery
-}
-mybattery = wibox.container.radialprogressbar()
-mybattery.border_color = "#222222"
-mybattery.color = "#ffffff"
-mybattery.max_value = 100
-mybattery:setup{
-  widget = wibox.container.place,
-  mybattery_icon
-}
-
-mybattery_label = wibox.widget{
-  widget = wibox.widget.textbox,
-  font = "Radio Space Bitmap 13",
-  fg = "#ffffff"
-}
-
-function update_battery_icon()
-  awful.spawn.easy_async_with_shell(
-    "cat /sys/class/power_supply/BAT0/status",
-    function(out)
-      if string.find(out, "Full") or string.find(out, "Unknown")
-      then
-        mybattery.color = "#4545dd"
-        mybattery_icon.image = beautiful.icon_battery_full
-      elseif string.find(out, "Charging") then
-        mybattery.color = "#4545dd"
-        mybattery_icon.image = beautiful.icon_battery_charge
-      else
-        mybattery.color = "#ffffff"
-        mybattery_icon.image = beautiful.icon_battery
-      end
-    end
-  )
-  awful.spawn.easy_async_with_shell(
-    "cat /sys/class/power_supply/BAT0/capacity",
-    function(out)
-      mybattery_label.text = tostring(tonumber(out)).."%"
-      mybattery.value = tonumber(out)
-      if tonumber(out) <= 15
-      then
-        mybattery_icon.image = beautiful.icon_battery_empty
-      end
-    end
-  )
-end
--- }}}
 -- {{{ Backlight
 mybacklight_icon = wibox.widget{
   widget = wibox.widget.imagebox,
@@ -296,7 +246,6 @@ gears.timer{
   call_now = true,
   autostart = true,
   callback = function ()
-    update_battery_icon()
     update_backlight_icon()
     update_volume_icon()
     update_sensors_icon()
@@ -481,29 +430,18 @@ awful.screen.connect_for_each_screen(function(s)
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = height - 280,
+      y = height - 230,
       type = 'dock',
       ontop = false,
       screen = s
     }
 
     awful.popup{
-      widget = mybattery_label,
-      bg = "#00000000",
-      preferred_positions = "right",
-      x = 80,
-      y = height - 130,
-      type = 'dock',
-      ontop = false,
-      screen = s
-    }
-    
-    awful.popup{
       widget = mybacklight_label,
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = height - 230,
+      y = height - 180,
       type = 'dock',
       ontop = false,
       screen = s
@@ -514,7 +452,7 @@ awful.screen.connect_for_each_screen(function(s)
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = height - 180,
+      y = height - 130,
       type = 'dock',
       ontop = false,
       screen = s
@@ -619,18 +557,6 @@ awful.screen.connect_for_each_screen(function(s)
             {
               widget = wibox.container.background,
               bg = beautiful.bg_normal,
-              shape = gears.shape.circle,
-              mybattery
-            }
-          },
-          {
-            widget = wibox.container.margin,
-            left = 10,
-            right = 10,
-            bottom = 10,
-            {
-              widget = wibox.container.background,
-              bg = beautiful.bg_normal,
               shape = gears.shape.rounded_rect,
               forced_height = 80,
               {
@@ -720,34 +646,7 @@ awful.screen.connect_for_each_screen(function(s)
             }
           }
         },
-        {
-          layout = wibox.layout.fixed.vertical,
-          {
-            widget = wibox.container.margin,
-            bottom = 10,
-            right = 10,
-            left = 10,
-            {
-              widget = wibox.container.background,
-              shape = gears.shape.rounded_rect,
-              bg = beautiful.bg_normal,
-              height = 40,
-              width = 40,
-              {
-                widget = wibox.widget.imagebox,
-                image = beautiful.icon_keyboard,
-                buttons = gears.table.join({
-                    awful.button({}, 1,
-                      function ()
-                        awful.spawn.with_shell("onboard")
-                      end
-                    )
-                }),
-              }
-            },
-          },
-          s.mywidget_container
-        }
+        s.mywidget_container
       }
     }
 end)
