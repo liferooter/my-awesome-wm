@@ -85,7 +85,7 @@ awful.layout.layouts = {
 
 -- {{{ Widgets
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock("<b>%H\n%M</b>")
+mytextclock = wibox.widget.textclock("%H\n%M")
 -- {{{ Sensors
 mysensors = wibox.container.radialprogressbar()
 mysensors.border_color = "#222222"

@@ -12,7 +12,7 @@ local themes_path = gears.filesystem.get_xdg_config_home().."/awesome/themes/"
 
 local theme = {}
 
-theme.font          = "Noto Sans 15"
+theme.font          = "Noto Sans 14"
 
 theme.bg_normal     = "#222222"
 theme.bg_focus      = "#4545bb"
