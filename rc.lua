@@ -711,34 +711,7 @@ awful.screen.connect_for_each_screen(function(s)
             }
           }
         },
-        {
-          layout = wibox.layout.fixed.vertical,
-          {
-            widget = wibox.container.margin,
-            bottom = 10,
-            right = 10,
-            left = 10,
-            {
-              widget = wibox.container.background,
-              shape = gears.shape.rounded_rect,
-              bg = beautiful.bg_normal,
-              height = 40,
-              width = 40,
-              {
-                widget = wibox.widget.imagebox,
-                image = beautiful.icon_keyboard,
-                buttons = gears.table.join({
-                    awful.button({}, 1,
-                      function ()
-                        awful.spawn.with_shell("onboard")
-                      end
-                    )
-                }),
-              }
-            },
-          },
-          s.mywidget_container
-        }
+        s.mywidget_container
       }
     }
 end)

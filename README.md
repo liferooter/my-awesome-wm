@@ -14,7 +14,6 @@ My AwesomeWM configs
 - xss-lock - as screensaver
 - i3lock-color - pretty locker
 - lm_sensors - for CPU temperature applet
-- onboard - good onscreen keyboard, integrated into my UI. You might remove it. (there is just one panel widget for onboard)
 - deadd-notification-center - notification center
 ### Optional:
 - autorandr - for automatic multihead configuration
