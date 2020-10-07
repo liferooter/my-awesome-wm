@@ -475,12 +475,13 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     local height = s.geometry.y + s.geometry.height
+    local width = s.geometry.x
 
     awful.popup{
       widget = mysensors_label,
       bg = "#00000000",
       preferred_positions = "right",
-      x = 80,
+      x = width + 80,
       y = height - 280,
       type = 'dock',
       ontop = false,
@@ -491,7 +492,7 @@ awful.screen.connect_for_each_screen(function(s)
       widget = mybattery_label,
       bg = "#00000000",
       preferred_positions = "right",
-      x = 80,
+      x = width + 80,
       y = height - 130,
       type = 'dock',
       ontop = false,
@@ -502,7 +503,7 @@ awful.screen.connect_for_each_screen(function(s)
       widget = mybacklight_label,
       bg = "#00000000",
       preferred_positions = "right",
-      x = 80,
+      x = width + 80,
       y = height - 230,
       type = 'dock',
       ontop = false,
@@ -513,7 +514,7 @@ awful.screen.connect_for_each_screen(function(s)
       widget = myvolumeicon_label,
       bg = "#00000000",
       preferred_positions = "right",
-      x = 80,
+      x = width + 80,
       y = height - 180,
       type = 'dock',
       ontop = false,
