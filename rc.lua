@@ -20,6 +20,17 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 require("awful.hotkeys_popup.keys")
 -- }}}
 
+-- {{{ Debug
+local naughty = require("naughty")
+naughty.connect_signal("request::display_error", function(message, startup)
+    naughty.notification {
+        urgency = "critical",
+        title   = "Oops, an error happened"..(startup and " during startup!" or "!"),
+        message = message
+    }
+end)
+-- }}}
+
 -- {{{ Nice
 
 -- Themes define colours, icons, font and wallpapers.
@@ -81,10 +92,8 @@ mysensors.border_color = "#222222"
 mysensors.color = "#ffffff"
 mysensors.max_value = 70
 mysensors_icon = wibox.widget{
-    widget = wibox.widget.textbox,
-    text = "",
-    font = "Material Icons 20",
-    forced_height = 40
+    widget = wibox.widget.imagebox,
+    image = beautiful.icon_sensors,
 } 
 mysensors:setup{
   widget = wibox.container.place,
@@ -109,10 +118,8 @@ end
 -- }}}
 -- {{{ Battery
 mybattery_icon = wibox.widget{
-  widget = wibox.widget.textbox,
-  markup = "",
-  font = "Material Icons 20",
-  forced_height = 40
+  widget = wibox.widget.imagebox,
+  image = beautiful.icon_battery
 }
 mybattery = wibox.container.radialprogressbar()
 mybattery.border_color = "#222222"
@@ -136,10 +143,13 @@ function update_battery_icon()
       if string.find(out, "Full") or string.find(out, "Unknown")
       then
         mybattery.color = "#4545dd"
-        mybattery_icon.markup = "<span foreground=\"#4545bb\"></span>"
+        mybattery_icon.image = beautiful.icon_battery_full
+      elseif string.find(out, "Charging") then
+        mybattery.color = "#4545dd"
+        mybattery_icon.image = beautiful.icon_battery_charge
       else
         mybattery.color = "#ffffff"
-        mybattery_icon.markup = ""
+        mybattery_icon.image = beautiful.icon_battery
       end
     end
   )
@@ -148,16 +158,18 @@ function update_battery_icon()
     function(out)
       mybattery_label.text = tostring(tonumber(out)).."%"
       mybattery.value = tonumber(out)
+      if tonumber(out) <= 15
+      then
+        mybattery_icon.image = beautiful.icon_battery_empty
+      end
     end
   )
 end
 -- }}}
 -- {{{ Backlight
 mybacklight_icon = wibox.widget{
-  widget = wibox.widget.textbox,
-  text = "",
-  font = "Material Icons 20",
-  forced_height = 40
+  widget = wibox.widget.imagebox,
+  image = beautiful.icon_backlight
 }
 mybacklight = wibox.container.radialprogressbar()
 mybacklight.border_color = "#222222"
@@ -169,21 +181,21 @@ mybacklight:setup{
     awful.button(
       {}, 1,
       function ()
-        awful.util.spawn("light -S 100")
+        awful.spawn("light -S 100")
         update_backlight_icon()
       end
     ),
     awful.button(
       {}, 4,
       function ()
-        awful.util.spawn("light -U 10")
+        awful.spawn("light -U 10")
         update_backlight_icon()
       end
     ),
     awful.button(
       {}, 5,
       function ()
-        awful.util.spawn("light -A 10")
+        awful.spawn("light -A 10")
         update_backlight_icon()
       end
     )
@@ -209,10 +221,8 @@ end
 -- }}}
 -- {{{ Volume
 myvolumeicon_icon = wibox.widget{
-  widget = wibox.widget.textbox,
-  text = "",
-  font = "Material Icons 20",
-  forced_height = 40
+  widget = wibox.widget.imagebox,
+  image = beautiful.icon_volumeicon
 }
 myvolumeicon = wibox.container.radialprogressbar()
 myvolumeicon.border_color = "#222222"
@@ -224,28 +234,28 @@ myvolumeicon:setup{
     awful.button(
       {}, 1,
       function ()
-        awful.util.spawn("amixer set Master toggle")
+        awful.spawn("amixer set Master toggle")
         update_volume_icon()
       end
     ),
     awful.button(
       {}, 2,
       function ()
-        awful.util.spawn("amixer set Master 100%")
+        awful.spawn("amixer set Master 100%")
         update_volume_icon()
       end
     ),
     awful.button(
       {}, 4,
       function ()
-        awful.util.spawn("amixer set Master 5%-")
+        awful.spawn("amixer set Master 5%-")
         update_volume_icon()
       end
     ),
     awful.button(
       {}, 5,
       function ()
-        awful.util.spawn("amixer set Master 5%+")
+        awful.spawn("amixer set Master 5%+")
         update_volume_icon()
       end
     )
@@ -273,7 +283,7 @@ function update_volume_icon ()
       if tonumber(out) > 100
       then
         out = tostring(100)
-        awful.util.spawn("amixer set Master 100%")
+        awful.spawn("amixer set Master 100%")
       end
       myvolumeicon_label.text = tostring(tonumber(out) or 0).."%"
       myvolumeicon.value = tonumber(out)
@@ -358,7 +368,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "", "", "", "", "", "", "", "I", "" }, s, awful.layout.suit.tile)
+    awful.tag({ "MESG", "TERM", "PROG", "WEB", "MAIL", "APPS", "GAMES", "WRITE", "ADMIN" }, s, awful.layout.suit.tile)
 
     s.mysystray = wibox.widget.systray{
         base_size     = 40,
@@ -410,16 +420,33 @@ awful.screen.connect_for_each_screen(function(s)
       layout   = wibox.layout.fixed.vertical,
       widget_template = {
         {
-          id         = 'text_role',
-          align     = "center",
+          id = 'icon',
+          widget = wibox.widget.imagebox,
           forced_height = 40,
           forced_width = 40,
-          widget    = wibox.widget.textbox
+          image = beautiful.icon_tag[1]
         },
         id     = 'background_role',
         widget = wibox.container.background,
+        create_callback = function (self, t, index, tags)
+          self:get_children_by_id('icon')[1].image = beautiful.icon_tag[index]
+          if not t:clients()[1]
+          then
+            self:get_children_by_id('icon')[1].opacity = 0.5
+          else
+            self:get_children_by_id('icon')[1].opacity = 1
+          end
+        end,
+        update_callback = function (self, t, index, tags)
+          if not t:clients()[1]
+          then
+            self:get_children_by_id('icon')[1].opacity = 0.5
+          else
+            self:get_children_by_id('icon')[1].opacity = 1
+          end
+        end
       },
-      buttons = taglist_buttons
+      buttons = taglist_buttons,
     }
 
     s.mytasklist = awful.widget.tasklist {
@@ -454,7 +481,7 @@ awful.screen.connect_for_each_screen(function(s)
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = height - 285,
+      y = height - 280,
       type = 'dock',
       ontop = false,
       screen = s
@@ -465,7 +492,7 @@ awful.screen.connect_for_each_screen(function(s)
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = height - 127,
+      y = height - 130,
       type = 'dock',
       ontop = false,
       screen = s
@@ -476,7 +503,7 @@ awful.screen.connect_for_each_screen(function(s)
       bg = "#00000000",
       preferred_positions = "right",
       x = 80,
-      y = height - 225,
+      y = height - 230,
       type = 'dock',
       ontop = false,
       screen = s
@@ -532,6 +559,7 @@ awful.screen.connect_for_each_screen(function(s)
               widget = wibox.container.background,
               bg = beautiful.bg_normal,
               shape = gears.shape.rounded_rect,
+              forced_height = 50,
               {
                 widget = wibox.container.place,
                 {
@@ -604,6 +632,7 @@ awful.screen.connect_for_each_screen(function(s)
               widget = wibox.container.background,
               bg = beautiful.bg_normal,
               shape = gears.shape.rounded_rect,
+              forced_height = 80,
               {
                 widget = wibox.container.place,
                 {
@@ -637,7 +666,8 @@ awful.screen.connect_for_each_screen(function(s)
               height = 40,
               width = 40,
               {
-                widget = wibox.widget.textbox,
+                widget = wibox.widget.imagebox,
+                image = beautiful.icon_power,
                 buttons = gears.table.join({
                     awful.button({}, 1,
                       function ()
@@ -645,8 +675,6 @@ awful.screen.connect_for_each_screen(function(s)
                       end
                     )
                 }),
-                text = "",
-                font = "Material Icons 30"
               }
             },
           },
@@ -662,16 +690,15 @@ awful.screen.connect_for_each_screen(function(s)
               height = 40,
               width = 40,
               {
-                widget = wibox.widget.textbox,
+                widget = wibox.widget.imagebox,
+                image = beautiful.icon_add,
                 buttons = gears.table.join({
                     awful.button({}, 1,
                       function ()
-                        awful.spawn.with_shell("pkill rofi || rofi -normal-window -show")
+                        awful.spawn.with_shell("pkill rofi || rofi -show")
                       end
                     )
                 }),
-                text = "",
-                font = "Material Icons 30"
               }
             },
           },
@@ -684,7 +711,7 @@ awful.screen.connect_for_each_screen(function(s)
           bottom = 10,
           {
             widget = wibox.container.background,
-            shape = gears.shape.rounded_bar,
+            shape = gears.shape.rounded_rect,
             bg = beautiful.bg_normal,
             width = 40,
             {
@@ -707,7 +734,8 @@ awful.screen.connect_for_each_screen(function(s)
               height = 40,
               width = 40,
               {
-                widget = wibox.widget.textbox,
+                widget = wibox.widget.imagebox,
+                image = beautiful.icon_keyboard,
                 buttons = gears.table.join({
                     awful.button({}, 1,
                       function ()
@@ -715,8 +743,6 @@ awful.screen.connect_for_each_screen(function(s)
                       end
                     )
                 }),
-                text = "",
-                font = "Material Icons 30"
               }
             },
           },
@@ -735,24 +761,24 @@ globalkeys = gears.table.join(
     { description = "show notification center", group = "apps" }),
   -- Volume
   awful.key({ }, "XF86AudioRaiseVolume", function ()
-      awful.util.spawn("amixer set Mater 5%+")
+      awful.spawn("amixer set Master 5%+")
       update_volume_icon()
   end),
    awful.key({ }, "XF86AudioLowerVolume", function ()
-       awful.util.spawn("amixer set Master 5%-")
+       awful.spawn("amixer set Master 5%-")
        update_volume_icon()
    end),
    awful.key({ }, "XF86AudioMute", function ()
-       awful.util.spawn("amixer set Master toggle")
+       awful.spawn("amixer set Master toggle")
        update_volume_icon()
    end),
   -- Brightness
   awful.key({ }, "XF86MonBrightnessDown", function ()
-      awful.util.spawn("light -U 10")
+      awful.spawn("light -U 10")
       update_backlight_icon()
   end),
   awful.key({ }, "XF86MonBrightnessUp", function ()
-      awful.util.spawn("light -A 10")
+      awful.spawn("light -A 10")
       update_backlight_icon()
   end),
   awful.key({ modkey, "Mod1" }, "h",      hotkeys_popup.show_help,
@@ -823,15 +849,15 @@ globalkeys = gears.table.join(
     {description = "select previous", group = "layout"}),
 
   -- Applications
-  awful.key({ modkey }, "p", function() awful.spawn.with_shell("pkill rofi || rofi -normal-window -show") end,
+  awful.key({ modkey }, "p", function() awful.spawn.with_shell("pkill rofi || rofi -show") end,
     {description = "show rofi menu", group = "apps"}),
-  awful.key({ modkey }, "c", function() awful.spawn.with_shell("pkill rofi || rofi -normal-window -show calc") end,
+  awful.key({ modkey }, "c", function() awful.spawn.with_shell("pkill rofi || rofi -show calc") end,
     {description = "show rofi calculator", group = "apps"}),
-  awful.key({ modkey }, "b", function() awful.util.spawn("bwmenu") end,
+  awful.key({ modkey }, "b", function() awful.spawn("bwmenu") end,
     {description = "show Bitwarden", group = "apps"}),
   awful.key({ modkey, "Shift" }, "p", function() awful.spawn.with_shell("~/.config/awesome/bin/power.sh") end,
     {description = "show power menu", group = "apps"}),
-  awful.key({ }, "Print", function() awful.util.spawn("flameshot gui") end,
+  awful.key({ }, "Print", function() awful.spawn("flameshot gui") end,
     {description = "take screenshot", group = "apps"}),
   awful.key({ modkey, "Control" }, "n",
     function ()

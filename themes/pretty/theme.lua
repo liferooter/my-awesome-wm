@@ -8,7 +8,7 @@ local dpi = xresources.apply_dpi
 
 local gfs = require("gears.filesystem")
 local gears = require("gears")
-local themes_path = "~/.config/awesome/themes/"
+local themes_path = gears.filesystem.get_xdg_config_home().."/awesome/themes/"
 
 local theme = {}
 
@@ -33,11 +33,8 @@ theme.border_color_normal = "#00000000"
 theme.border_color_active = "#99999977"
 
 theme.tasklist_bg_focus = "#ffffff"
-theme.tasklist_shape = gears.shape.circle
+theme.tasklist_shape = gears.shape.rounded_rect
 
-theme.taglist_fg_occupied = "#ffffff"
-theme.taglist_fg_empty = "#aaaaaa"
-theme.taglist_font = "Material Icons 17"
 -- There are other variable sets
 -- overriding the default one when
 -- defined, the sets are:
@@ -93,6 +90,29 @@ theme.layout_cornernw = themes_path.."pretty/layouts/cornernw.png"
 theme.layout_cornerne = themes_path.."pretty/layouts/cornerne.png"
 theme.layout_cornersw = themes_path.."pretty/layouts/cornersw.png"
 theme.layout_cornerse = themes_path.."pretty/layouts/cornerse.png"
+
+theme.icon_tag = {
+    themes_path.."pretty/icons/mesg.png",
+    themes_path.."pretty/icons/term.png",
+    themes_path.."pretty/icons/prog.png",
+    themes_path.."pretty/icons/web.png",
+    themes_path.."pretty/icons/mail.png",
+    themes_path.."pretty/icons/apps.png",
+    themes_path.."pretty/icons/games.png",
+    themes_path.."pretty/icons/write.png",
+    themes_path.."pretty/icons/admin.png"
+}
+theme.icon_sensors = themes_path.."pretty/icons/sensors.png"
+theme.icon_backlight = themes_path.."pretty/icons/backlight.png"
+theme.icon_volumeicon = themes_path.."pretty/icons/volumeicon.png"
+theme.icon_battery = themes_path.."pretty/icons/battery.png"
+theme.icon_battery_empty = themes_path.."pretty/icons/battery_empty.png"
+theme.icon_battery_charge = themes_path.."pretty/icons/battery_charge.png"
+theme.icon_battery_full = themes_path.."pretty/icons/battery_full.png"
+theme.icon_power = themes_path.."pretty/icons/power.png"
+theme.icon_add = themes_path.."pretty/icons/add.png"
+theme.icon_keyboard = themes_path.."pretty/icons/keyboard.png"
+
 
 -- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.

@@ -7,6 +7,7 @@ My AwesomeWM configs
 - AwesomeWM - *git version*
 - dex - .desktop interpreter, for autostart
 - Tela icon theme - beautiful icon theme
+- Noto Sans - default font
 - light - brightness control
 - picom - not tryone, just normal picom
 - alsa - for audio control
@@ -34,6 +35,7 @@ My AwesomeWM configs
 - Kvantum - Qt theme engine
 - Capitaine cursors - my curcor theme
 - Flameshot - the best screenshot utility for Linux
+- Redshift - make your display warm
 
 ## Installation
 1. Clone my repo with submodules to ~/.config/awesome:
