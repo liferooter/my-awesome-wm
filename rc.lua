@@ -501,12 +501,7 @@ awful.screen.connect_for_each_screen(function(s)
               forced_height = 50,
               {
                 widget = wibox.container.place,
-                {
-                  widget = wibox.container.margin,
-                  top = 10,
-                  bottom = 10,
-                  awful.widget.keyboardlayout
-                }
+                awful.widget.keyboardlayout
               }
             }
           }
