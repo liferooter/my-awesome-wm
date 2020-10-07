@@ -439,7 +439,7 @@ awful.screen.connect_for_each_screen(function(s)
       screen = s
     }
 
-    mybattery_popup = awful.popup{
+    s.mybattery_popup = awful.popup{
       widget = mybattery_label,
       bg = "#00000000",
       preferred_positions = "right",
@@ -449,7 +449,7 @@ awful.screen.connect_for_each_screen(function(s)
       ontop = false
     }
     
-    mybacklight_popup = awful.popup{
+    s.mybacklight_popup = awful.popup{
       widget = mybacklight_label,
       bg = "#00000000",
       preferred_positions = "right",
@@ -459,7 +459,7 @@ awful.screen.connect_for_each_screen(function(s)
       ontop = false
     }
 
-    myvolumeicon_popup = awful.popup{
+    s.myvolumeicon_popup = awful.popup{
       widget = myvolumeicon_label,
       bg = "#00000000",
       preferred_positions = "right",
