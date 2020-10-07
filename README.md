@@ -4,7 +4,7 @@ My AwesomeWM configs
 ![screenshot](Screenshot-2.png)
 ## Dependencies
 ### Required:
-- AwesomeWM - git version
+- AwesomeWM - *git version*
 - dex - .desktop interpreter, for autostart
 - Tela icon theme - beautiful icon theme
 - light - brightness control
