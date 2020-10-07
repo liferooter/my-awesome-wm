@@ -9,7 +9,7 @@ My AwesomeWM configs
 - Tela icon theme - beautiful icon theme
 - light - brightness control
 - picom - not tryone, just normal picom
-- pulseaudio and alsa - for audio control
+- alsa - for audio control
 - xss-lock - as screensaver
 - i3lock-color - pretty locker
 - lm_sensors - for CPU temperature applet

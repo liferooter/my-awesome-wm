@@ -231,21 +231,21 @@ myvolumeicon:setup{
     awful.button(
       {}, 2,
       function ()
-        awful.util.spawn("pactl set-sink-volume 0 100%")
+        awful.util.spawn("amixer set Master 100%")
         update_volume_icon()
       end
     ),
     awful.button(
       {}, 4,
       function ()
-        awful.util.spawn("pactl set-sink-volume 0 -5%")
+        awful.util.spawn("amixer set Master 5%-")
         update_volume_icon()
       end
     ),
     awful.button(
       {}, 5,
       function ()
-        awful.util.spawn("pactl set-sink-volume 0 +5%")
+        awful.util.spawn("amixer set Master 5%+")
         update_volume_icon()
       end
     )
@@ -273,7 +273,7 @@ function update_volume_icon ()
       if tonumber(out) > 100
       then
         out = tostring(100)
-        awful.util.spawn("pactl set-sink-volume 0 100%")
+        awful.util.spawn("amixer set Master 100%")
       end
       myvolumeicon_label.text = tostring(tonumber(out) or 0).."%"
       myvolumeicon.value = tonumber(out)
@@ -735,11 +735,11 @@ globalkeys = gears.table.join(
     { description = "show notification center", group = "apps" }),
   -- Volume
   awful.key({ }, "XF86AudioRaiseVolume", function ()
-      awful.util.spawn("pactl set-sink-volume 0 +5%")
+      awful.util.spawn("amixer set Mater 5%+")
       update_volume_icon()
   end),
    awful.key({ }, "XF86AudioLowerVolume", function ()
-       awful.util.spawn("pactl set-sink-volume 0 -5%")
+       awful.util.spawn("amixer set Master 5%-")
        update_volume_icon()
    end),
    awful.key({ }, "XF86AudioMute", function ()
