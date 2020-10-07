@@ -654,6 +654,10 @@ end)
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
+  awful.key({ modkey, "Control" }, "s", function ()
+      awful.spawn.with_shell("~/.config/awesome/config/rofi/scripts.sh")
+                                        end,
+  { description = "run custom script with rofi", group = "apps" }), -- https://github.com/davatorium/rofi/wiki/Script-Launcher
   awful.key({ modkey, "Shift" }, "n", function ()
       awful.spawn.with_shell("bash -c 'kill -s USR1 $(pidof deadd-notification-center)'")
                                       end,
