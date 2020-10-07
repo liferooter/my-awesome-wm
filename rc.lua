@@ -97,16 +97,6 @@ mysensors_label = wibox.widget{
   fg = "#ffffff"
 }
 
-mysensors_popup = awful.popup{
-  widget = mysensors_label,
-  bg = "#00000000",
-  preferred_positions = "right",
-  x = 80,
-  y = 795,
-  type = 'dock',
-  ontop = false
-}
-
 function update_sensors_icon ()
     awful.spawn.easy_async_with_shell(
       "bash -c \"sensors | grep 'Core 0' | cut -d' ' -f10 | tr -d '+' | cut -d'.' -f1\"",
@@ -137,16 +127,6 @@ mybattery_label = wibox.widget{
   widget = wibox.widget.textbox,
   font = "Radio Space Bitmap 13",
   fg = "#ffffff"
-}
-
-mybattery_popup = awful.popup{
-  widget = mybattery_label,
-  bg = "#00000000",
-  preferred_positions = "right",
-  x = 80,
-  y = 953,
-  type = 'dock',
-  ontop = false
 }
 
 function update_battery_icon()
@@ -217,16 +197,6 @@ mybacklight_label = wibox.widget{
   fg = "#ffffff"
 }
 
-mybacklight_popup = awful.popup{
-  widget = mybacklight_label,
-  bg = "#00000000",
-  preferred_positions = "right",
-  x = 80,
-  y = 855,
-  type = 'dock',
-  ontop = false
-}
-
 function update_backlight_icon ()
   awful.spawn.easy_async_with_shell(
     "bash -c 'xbacklight | cut -d\".\" -f1'",
@@ -287,16 +257,6 @@ myvolumeicon_label = wibox.widget{
   widget = wibox.widget.textbox,
   font = "Radio Space Bitmap 13",
   fg = "#ffffff"
-}
-
-myvolumeicon_popup = awful.popup{
-  widget = myvolumeicon_label,
-  bg = "#00000000",
-  preferred_positions = "right",
-  x = 80,
-  y = 900,
-  type = 'dock',
-  ontop = false
 }
 
 function update_volume_icon ()
@@ -467,7 +427,48 @@ awful.screen.connect_for_each_screen(function(s)
       reverse = true
     }
     s.mysystray:set_horizontal(false)
+
+    s.mysensors_popup = awful.popup{
+      widget = mysensors_label,
+      bg = "#00000000",
+      preferred_positions = "right",
+      x = 80,
+      y = s.geometry.height - 285,
+      type = 'dock',
+      ontop = false,
+      screen = s
+    }
+
+    mybattery_popup = awful.popup{
+      widget = mybattery_label,
+      bg = "#00000000",
+      preferred_positions = "right",
+      x = 80,
+      y = s.geometry.height - 127,
+      type = 'dock',
+      ontop = false
+    }
     
+    mybacklight_popup = awful.popup{
+      widget = mybacklight_label,
+      bg = "#00000000",
+      preferred_positions = "right",
+      x = 80,
+      y = s.geometry.height - 225,
+      type = 'dock',
+      ontop = false
+    }
+
+    myvolumeicon_popup = awful.popup{
+      widget = myvolumeicon_label,
+      bg = "#00000000",
+      preferred_positions = "right",
+      x = 80,
+      y = s.geometry.height - 180,
+      type = 'dock',
+      ontop = false
+    }
+
     -- Create the wibox
     
     s.mywibox_left = awful.wibar({ position = "left", screen = s, width = 60, bg = "#00000000", type = "dock" })
