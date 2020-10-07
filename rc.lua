@@ -26,7 +26,6 @@ require("awful.hotkeys_popup.keys")
 beautiful.init("~/.config/awesome/themes/pretty/theme.lua")
 local nice = require("nice")
 nice{
-  no_titlebar_maximized = true,
   floating_color = "#0077ff",
   sticky_color = "#ff0077",
   ontop_color = "#77ff00",
@@ -38,6 +37,17 @@ nice{
 }
 
 awesome.set_preferred_icon_size(30)
+-- }}}
+
+-- {{{ Debug
+local naughty = require("naughty")
+naughty.connect_signal("request::display_error", function(message, startup)
+    naughty.notification {
+        urgency = "critical",
+        title   = "Oops, an error happened"..(startup and " during startup!" or "!"),
+        message = message
+    }
+end)
 -- }}}
 
 -- {{{ Defaults
