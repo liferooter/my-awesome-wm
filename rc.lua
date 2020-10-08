@@ -1012,7 +1012,7 @@ awful.rules.rules = {
     properties = {focusable = true}
   },
   {
-    rule = {instance = "rofi"},
+    rule_any = {instance = {"rofi", "yakuake"}},
     properties = {ontop = true, floating = true, placement = awful.placement.top}
   }
 }
@@ -1035,9 +1035,9 @@ client.connect_signal("manage", function (c)
 end)
 
 -- Enable sloppy focus, so that focus follows mouse.
-client.connect_signal("mouse::enter", function(c)
-                        c:emit_signal("request::activate", "mouse_enter", {raise = false})
-end)
+-- client.connect_signal("mouse::enter", function(c)
+--                        c:emit_signal("request::activate", "mouse_enter", {raise = false})
+-- end)
 
 -- }}}
 
@@ -1053,7 +1053,6 @@ autostart_list = {
   "nm-applet",
   "~/.config/awesome/bin/autostart.sh",
   "~/.config/awesome/bin/powerbtn.sh",
-  "tilda",
   "redshift-gtk"
 }
 for i,cmd in ipairs(autostart_list)

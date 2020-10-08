@@ -22,7 +22,6 @@ My AwesomeWM configs
 - kwallet - it is kwallet, you know
 - polkit-kde - polkit agent
 - kitty - default terminal
-- tilda - good dropdown terminal
 - Fira Code font - for my kitty
 - xfce4-power-manager - pretty good power manager
 - rofi-calc - calculator in rofi
