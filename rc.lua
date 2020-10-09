@@ -37,6 +37,7 @@ end)
 beautiful.init("~/.config/awesome/themes/pretty/theme.lua")
 local nice = require("nice")
 nice{
+  no_titlebar_maximized = true,
   floating_color = "#0077ff",
   sticky_color = "#ff0077",
   ontop_color = "#77ff00",
@@ -1035,9 +1036,9 @@ client.connect_signal("manage", function (c)
 end)
 
 -- Enable sloppy focus, so that focus follows mouse.
--- client.connect_signal("mouse::enter", function(c)
---                        c:emit_signal("request::activate", "mouse_enter", {raise = false})
--- end)
+client.connect_signal("mouse::enter", function(c)
+                       c:emit_signal("request::activate", "mouse_enter", {raise = false})
+end)
 
 -- }}}
 
