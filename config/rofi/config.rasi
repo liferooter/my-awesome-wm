@@ -18,7 +18,7 @@ configuration {
 	combi-modi: "window,drun";
 	hide-scrollbar: true;
 	scroll-method: 1;
-	window-format: "    {c}   {t}";
+	/* window-format: "    {c}   {t}"; */
 	theme: "myrules";
 	kb-accept-entry: "Control+j,Control+m,KP_Enter";
 	kb-accept-custom: "Control+Return";

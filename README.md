@@ -16,7 +16,6 @@ My AwesomeWM configs
 - lm_sensors - for CPU temperature applet
 - deadd-notification-center - notification center
 ### Optional:
-- autorandr - for automatic multihead configuration
 - nm-applet - for network applet
 - blueman - for bluetooth configuration
 - kwallet - it is kwallet, you know
@@ -26,6 +25,7 @@ My AwesomeWM configs
 - xfce4-power-manager - pretty good power manager
 - rofi-calc - calculator in rofi
 - rofi-bitwarden (aka bwmenu) - Bitwarden in rofi
+- clipmenu - clipboard history on top of rofi
 - acpid - rofi menu on power button
 - dconf and gsetting - to set icon theme for Qt apps
 - lxappearance - theming
@@ -33,7 +33,6 @@ My AwesomeWM configs
 - Kvantum - Qt theme engine
 - Capitaine cursors - my curcor theme
 - Flameshot - the best screenshot utility for Linux
-- Redshift - make your display warm
 - playerctl - control your player
 
 ## Installation
@@ -54,6 +53,7 @@ cp ~/.config/awesome/fonts/* ~/.local/share/fonts/
 `
 sudo systemctl enable --now acpid
 systemctl --user enable --now deadd-notification-center
+systemctl --user enable --now clipmenud
 `
 5. Copy my xinitrc and xprofile to your home:
 `

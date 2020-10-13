@@ -21,14 +21,14 @@ require("awful.hotkeys_popup.keys")
 -- }}}
 
 -- {{{ Debug
-local naughty = require("naughty")
-naughty.connect_signal("request::display_error", function(message, startup)
-    naughty.notification {
-        urgency = "critical",
-        title   = "Oops, an error happened"..(startup and " during startup!" or "!"),
-        message = message
-    }
-end)
+-- local naughty = require("naughty")
+-- naughty.connect_signal("request::display_error", function(message, startup)
+    -- naughty.notification {
+        -- urgency = "critical",
+        -- title   = "Oops, an error happened"..(startup and " during startup!" or "!"),
+        -- message = message
+    -- }
+-- end)
 -- }}}
 
 -- {{{ Nice
@@ -72,15 +72,15 @@ awful.layout.layouts = {
   awful.layout.suit.tile.top,
   awful.layout.suit.fair,
   awful.layout.suit.fair.horizontal,
-  awful.layout.suit.spiral,
+  -- awful.layout.suit.spiral,
   -- awful.layout.suit.spiral.dwindle,
   awful.layout.suit.max,
   awful.layout.suit.max.fullscreen,
-  awful.layout.suit.magnifier,
-  awful.layout.suit.corner.nw,
-  awful.layout.suit.corner.ne,
-  awful.layout.suit.corner.sw,
-  awful.layout.suit.corner.se,
+  -- awful.layout.suit.magnifier,
+  -- awful.layout.suit.corner.nw,
+  -- awful.layout.suit.corner.ne,
+  -- awful.layout.suit.corner.sw,
+  -- awful.layout.suit.corner.se,
 }
 -- }}}
 
@@ -272,7 +272,7 @@ myvolumeicon_label = wibox.widget{
 
 function update_volume_icon ()
   awful.spawn.easy_async_with_shell(
-    "bash -c 'amixer | grep Master -A 6 | tail -n 1 | grep \\'\\[on\\]\\' | cut -d\"[\" -f2 | tr -d \"%]\"'",
+    "~/.config/awesome/bin/volume.sh",
     function(out)
       if tonumber(out) == nil
       then
@@ -337,9 +337,6 @@ local tasklist_buttons = gears.table.join(
         )
         awful.client.jumpto(c)
       end
-  end),
-  awful.button({ }, 3, function()
-      awful.menu.client_list({ theme = { width = 250 } })
   end),
   awful.button({ }, 4, function ()
       awful.client.focus.byidx(1)
@@ -819,13 +816,15 @@ globalkeys = gears.table.join(
 
   -- Applications
   awful.key({ modkey }, "p", function() awful.spawn.with_shell("pkill rofi || rofi -show") end,
-    {description = "show rofi menu", group = "apps"}),
+    {description = "show rofi menu", group = "rofi"}),
   awful.key({ modkey }, "c", function() awful.spawn.with_shell("pkill rofi || rofi -show calc") end,
-    {description = "show rofi calculator", group = "apps"}),
+    {description = "show rofi calculator", group = "rofi"}),
+  awful.key({ modkey, "Shift" }, "c", function() awful.spawn.with_shell("env CM_LAUNCHER=rofi clipmenu") end,
+    {description = "show rofi clipmenu", group = "rofi"}),
   awful.key({ modkey }, "b", function() awful.spawn("bwmenu") end,
-    {description = "show Bitwarden", group = "apps"}),
+    {description = "show rofi bitwarden", group = "rofi"}),
   awful.key({ modkey, "Shift" }, "p", function() awful.spawn.with_shell("~/.config/awesome/bin/power.sh") end,
-    {description = "show power menu", group = "apps"}),
+    {description = "show power menu", group = "rofi"}),
   awful.key({ }, "Print", function() awful.spawn("flameshot gui") end,
     {description = "take screenshot", group = "apps"}),
   awful.key({ modkey, "Control" }, "n",
@@ -1034,6 +1033,12 @@ client.connect_signal("manage", function (c)
                         end
                         
 end)
+client.connect_signal("property::fullscreen", function(self)
+                        if self.fullscreen
+                        then
+                          self.shape = gears.shape.rectangle
+                        end
+end)
 
 -- Enable sloppy focus, so that focus follows mouse.
 client.connect_signal("mouse::enter", function(c)
@@ -1044,7 +1049,6 @@ end)
 
 -- {{{ Autostart
 autostart_list = {
-  "autorandr horizontal",
   "picom -b --config ~/.config/awesome/picom.conf",
   "xfce4-power-manager",
   "xss-lock ~/.config/awesome/bin/lock.sh",
@@ -1054,7 +1058,6 @@ autostart_list = {
   "nm-applet",
   "~/.config/awesome/bin/autostart.sh",
   "~/.config/awesome/bin/powerbtn.sh",
-  "redshift-gtk"
 }
 for i,cmd in ipairs(autostart_list)
 do    
