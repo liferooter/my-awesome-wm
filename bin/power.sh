@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ACTION=$(pkill rofi || rofi -dmenu -p "Do" < ~/.config/awesome/bin/power_actions)
+ACTION=$(pkill rofi || rofi -dmenu -i -p "Do" < ~/.config/awesome/bin/power_actions)
 case $ACTION in
     "Power off")
         poweroff

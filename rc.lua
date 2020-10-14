@@ -87,6 +87,44 @@ awful.layout.layouts = {
 -- {{{ Widgets
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock("<b>%H\n%M</b>")
+
+-- {{{ Updates
+myupdates = wibox.container.radialprogressbar()
+myupdates.border_color = "#222222"
+myupdates.color = "#ffffff"
+myupdates.max_value = 1
+myupdates.value = 1
+myupdates_icon = wibox.widget{
+    widget = wibox.widget.imagebox,
+    image = beautiful.icon_updates,
+} 
+myupdates:setup{
+  widget = wibox.container.place,
+  myupdates_icon
+}
+
+myupdates_label = wibox.widget{
+  widget = wibox.widget.textbox,
+  font = "Radio Space Bitmap 13",
+  fg = "#ffffff"
+}
+
+function update_updates_icon ()
+    awful.spawn.easy_async_with_shell(
+      "checkupdates+aur | wc -l",
+      function(out)
+        local updates_available = tonumber(out)
+        if updates_available == 0
+        then
+          myupdates.color = "#ffffff"
+        else
+          myupdates.color = "#3333ff"
+        end
+        myupdates_label.text = tostring(updates_available)
+      end
+    )
+end
+-- }}}
 -- {{{ Sensors
 mysensors = wibox.container.radialprogressbar()
 mysensors.border_color = "#222222"
@@ -296,11 +334,17 @@ gears.timer{
   timeout = 1,
   call_now = true,
   autostart = true,
+  callback = update_battery_icon
+}
+gears.timer{
+  timeout = 5,
+  call_now = true,
+  autostart = true,
   callback = function ()
-    update_battery_icon()
     update_backlight_icon()
     update_volume_icon()
     update_sensors_icon()
+    update_updates_icon()
   end
 }
 
@@ -476,6 +520,17 @@ awful.screen.connect_for_each_screen(function(s)
     local width = s.geometry.x
 
     awful.popup{
+      widget = myupdates_label,
+      bg = "#00000000",
+      preferred_positions = "right",
+      x = width + 80,
+      y = height - 330,
+      type = 'dock',
+      ontop = false,
+      screen = s
+    }
+
+    awful.popup{
       widget = mysensors_label,
       bg = "#00000000",
       preferred_positions = "right",
@@ -569,6 +624,18 @@ awful.screen.connect_for_each_screen(function(s)
         nil,
         {
           layout = wibox.layout.fixed.vertical,
+          {
+            widget = wibox.container.margin,
+            left = 10,
+            right = 10,
+            bottom = 10,
+            {
+              widget = wibox.container.background,
+              bg = beautiful.bg_normal,
+              shape = gears.shape.circle,
+              myupdates
+            }
+          },
           {
             widget = wibox.container.margin,
             left = 10,

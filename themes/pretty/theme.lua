@@ -71,7 +71,7 @@ theme.hotkeys_modifiers_fg = "#dddddd"
 theme.hotkeys_description_font = "Fira Code 9"
 
 -- Define the wallpaper to load
-theme.wallpaper = themes_path.."pretty/background.png"
+theme.wallpaper = themes_path.."pretty/background.jpg"
 
 -- You can use your own layout icons like this:
 theme.layout_fairh = themes_path.."pretty/layouts/fairh.png"
@@ -102,6 +102,7 @@ theme.icon_tag = {
     themes_path.."pretty/icons/write.png",
     themes_path.."pretty/icons/admin.png"
 }
+theme.icon_updates = themes_path.."pretty/icons/updates.png"
 theme.icon_sensors = themes_path.."pretty/icons/sensors.png"
 theme.icon_backlight = themes_path.."pretty/icons/backlight.png"
 theme.icon_volumeicon = themes_path.."pretty/icons/volumeicon.png"

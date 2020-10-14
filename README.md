@@ -5,6 +5,8 @@ My AwesomeWM configs
 ## Dependencies
 ### Required:
 - AwesomeWM - *git version*
+- Arch Linux - my Linux distribution
+- checkupdates+aur - look for new versions of programs
 - dex - .desktop interpreter, for autostart
 - Tela icon theme - beautiful icon theme
 - Noto Sans - default font
