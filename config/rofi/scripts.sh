@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 WORKINGDIR="$HOME/.scripts/"
 MAP="$WORKINGDIR/cmd.csv"

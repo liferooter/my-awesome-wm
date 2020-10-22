@@ -6,15 +6,15 @@
 pcall(require, "luarocks.loader")
 
 -- Standard awesome library
-local gears = require("gears")
+gears = require("gears")
 awful = require("awful")
 require("awful.autofocus")
 -- Widget and layout library
-local wibox = require("wibox")
+wibox = require("wibox")
 -- Theme handling library
-local beautiful = require("beautiful")
+beautiful = require("beautiful")
 -- Notification library
-local hotkeys_popup = require("awful.hotkeys_popup")
+hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
@@ -67,15 +67,15 @@ modkey = "Mod4"
 awful.layout.layouts = {
   awful.layout.suit.floating,
   awful.layout.suit.tile,
-  awful.layout.suit.tile.left,
-  awful.layout.suit.tile.bottom,
+  -- awful.layout.suit.tile.left,
+  -- awful.layout.suit.tile.bottom,
   awful.layout.suit.tile.top,
   awful.layout.suit.fair,
-  awful.layout.suit.fair.horizontal,
+  -- awful.layout.suit.fair.horizontal,
   -- awful.layout.suit.spiral,
   -- awful.layout.suit.spiral.dwindle,
-  awful.layout.suit.max,
   awful.layout.suit.max.fullscreen,
+  awful.layout.suit.max,
   -- awful.layout.suit.magnifier,
   -- awful.layout.suit.corner.nw,
   -- awful.layout.suit.corner.ne,
@@ -88,43 +88,6 @@ awful.layout.layouts = {
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock("<b>%H\n%M</b>")
 
--- {{{ Updates
-myupdates = wibox.container.radialprogressbar()
-myupdates.border_color = "#222222"
-myupdates.color = "#ffffff"
-myupdates.max_value = 1
-myupdates.value = 1
-myupdates_icon = wibox.widget{
-    widget = wibox.widget.imagebox,
-    image = beautiful.icon_updates,
-} 
-myupdates:setup{
-  widget = wibox.container.place,
-  myupdates_icon
-}
-
-myupdates_label = wibox.widget{
-  widget = wibox.widget.textbox,
-  font = "Radio Space Bitmap 13",
-  fg = "#ffffff"
-}
-
-function update_updates_icon ()
-    awful.spawn.easy_async_with_shell(
-      "checkupdates+aur | wc -l",
-      function(out)
-        local updates_available = tonumber(out)
-        if updates_available == 0
-        then
-          myupdates.color = "#ffffff"
-        else
-          myupdates.color = "#3333ff"
-        end
-        myupdates_label.text = tostring(updates_available)
-      end
-    )
-end
--- }}}
 -- {{{ Sensors
 mysensors = wibox.container.radialprogressbar()
 mysensors.border_color = "#222222"
@@ -250,7 +213,7 @@ mybacklight_label = wibox.widget{
 
 function update_backlight_icon ()
   awful.spawn.easy_async_with_shell(
-    "bash -c 'xbacklight | cut -d\".\" -f1'",
+    "bash -c 'light | cut -d\".\" -f1'",
     function(out)
       mybacklight.value = tonumber(out)
       mybacklight_label.text = tostring(tonumber(out)).."%"
@@ -344,7 +307,6 @@ gears.timer{
     update_backlight_icon()
     update_volume_icon()
     update_sensors_icon()
-    update_updates_icon()
   end
 }
 
@@ -520,17 +482,6 @@ awful.screen.connect_for_each_screen(function(s)
     local width = s.geometry.x
 
     awful.popup{
-      widget = myupdates_label,
-      bg = "#00000000",
-      preferred_positions = "right",
-      x = width + 80,
-      y = height - 330,
-      type = 'dock',
-      ontop = false,
-      screen = s
-    }
-
-    awful.popup{
       widget = mysensors_label,
       bg = "#00000000",
       preferred_positions = "right",
@@ -624,18 +575,6 @@ awful.screen.connect_for_each_screen(function(s)
         nil,
         {
           layout = wibox.layout.fixed.vertical,
-          {
-            widget = wibox.container.margin,
-            left = 10,
-            right = 10,
-            bottom = 10,
-            {
-              widget = wibox.container.background,
-              bg = beautiful.bg_normal,
-              shape = gears.shape.circle,
-              myupdates
-            }
-          },
           {
             widget = wibox.container.margin,
             left = 10,
@@ -892,7 +831,7 @@ globalkeys = gears.table.join(
     {description = "show rofi bitwarden", group = "rofi"}),
   awful.key({ modkey, "Shift" }, "p", function() awful.spawn.with_shell("~/.config/awesome/bin/power.sh") end,
     {description = "show power menu", group = "rofi"}),
-  awful.key({ }, "Print", function() awful.spawn("flameshot gui") end,
+  awful.key({ }, "Print", function() awful.spawn.with_shell("~/.config/awesome/bin/screenshot.sh && amixer set Master toggle") end,
     {description = "take screenshot", group = "apps"}),
   awful.key({ modkey, "Control" }, "n",
     function ()
